@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#0a0a0f">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="description" content="Commander - Your daily execution cockpit">
+  
+  <title>Commander</title>
+  
+  <link rel="icon" type="image/png" href="/icons/icon-192.png">
+  <link rel="apple-touch-icon" href="/icons/icon-192.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <!-- Status Bar -->
+  <header class="status-bar">
+    <div class="status-title">⚡ Commander</div>
+    <div class="status-indicator" id="saveStatus">Ready</div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="commander-container" id="commander">
+    <!-- Sections rendered by JS -->
+  </main>
+
+  <!-- Bottom Action Bar -->
+  <nav class="action-bar">
+    <button class="action-btn" data-action="add-inbox" aria-label="Add to Inbox">
+      <span class="action-icon">+</span>
+      <span class="action-label">Inbox</span>
+    </button>
+    <button class="action-btn" data-action="add-next" aria-label="Add to Next">
+      <span class="action-icon">+</span>
+      <span class="action-label">Next</span>
+    </button>
+    <button class="action-btn action-btn-primary" data-action="add-ship" aria-label="Add to Ship Today">
+      <span class="action-icon">🚀</span>
+      <span class="action-label">Ship</span>
+    </button>
+    <button class="action-btn action-btn-menu" data-action="menu" aria-label="Menu">
+      <span class="action-icon">⋮</span>
+    </button>
+  </nav>
+
+  <!-- Context Menu (Move/Delete) -->
+  <div class="context-menu" id="contextMenu" hidden>
+    <div class="context-menu-header">Move to:</div>
+    <button class="context-btn" data-move="inbox">📥 Inbox</button>
+    <button class="context-btn" data-move="next">📋 Next</button>
+    <button class="context-btn" data-move="shipToday">🚀 Ship Today</button>
+    <hr class="context-divider">
+    <button class="context-btn context-btn-danger" data-action="delete">🗑️ Delete</button>
+    <button class="context-btn" data-action="cancel">Cancel</button>
+  </div>
+
+  <!-- Menu Modal -->
+  <div class="modal-overlay" id="menuOverlay" hidden>
+    <div class="modal">
+      <div class="modal-header">
+        <h2>Commander Menu</h2>
+        <button class="modal-close" data-action="close-menu">×</button>
+      </div>
+      <div class="modal-body">
+        <button class="menu-btn" data-action="export-md">📄 Export as Markdown</button>
+        <button class="menu-btn" data-action="export-json">💾 Export as JSON</button>
+        <button class="menu-btn" data-action="import-json">📂 Import JSON</button>
+        <hr class="menu-divider">
+        <button class="menu-btn" data-action="undo">↩️ Undo Last Action</button>
+        <hr class="menu-divider">
+        <button class="menu-btn menu-btn-danger" data-action="clear-all">🗑️ Clear All (Confirm)</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirm Modal -->
+  <div class="modal-overlay" id="confirmOverlay" hidden>
+    <div class="modal modal-confirm">
+      <div class="modal-header">
+        <h2 id="confirmTitle">Confirm</h2>
+      </div>
+      <div class="modal-body">
+        <p id="confirmMessage">Are you sure?</p>
+        <div class="modal-actions">
+          <button class="btn btn-cancel" data-action="confirm-cancel">Cancel</button>
+          <button class="btn btn-danger" data-action="confirm-yes">Yes, Delete</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hidden file input for import -->
+  <input type="file" id="importInput" accept=".json" hidden>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
