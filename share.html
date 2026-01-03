@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0a0a0f">
+    <title>Commander - Share</title>
+    <link rel="stylesheet" href="./style.css">
+    <style>
+        .share-container {
+            padding: 80px 16px 100px;
+            min-height: 100vh;
+        }
+
+        .share-header {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: var(--text-primary, #f0f0f5);
+        }
+
+        .share-preview {
+            background: var(--bg-secondary, #12121a);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+            max-height: 200px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            font-size: 14px;
+            color: var(--text-secondary, #a0a0b0);
+        }
+
+        .share-category {
+            margin-bottom: 16px;
+        }
+
+        .share-category label {
+            display: block;
+            font-size: 14px;
+            color: var(--text-muted, #606070);
+            margin-bottom: 8px;
+        }
+
+        .share-category select {
+            width: 100%;
+            min-height: 48px;
+            padding: 8px 16px;
+            background: var(--bg-secondary, #12121a);
+            border: 1px solid var(--border-color, #2a2a38);
+            border-radius: 8px;
+            color: var(--text-primary, #f0f0f5);
+            font-size: 16px;
+        }
+
+        .share-field {
+            margin-bottom: 16px;
+        }
+
+        .share-field label {
+            display: block;
+            font-size: 14px;
+            color: var(--text-muted, #606070);
+            margin-bottom: 8px;
+        }
+
+        .share-field input {
+            width: 100%;
+            min-height: 48px;
+            padding: 8px 16px;
+            background: var(--bg-secondary, #12121a);
+            border: 1px solid var(--border-color, #2a2a38);
+            border-radius: 8px;
+            color: var(--text-primary, #f0f0f5);
+            font-size: 16px;
+        }
+
+        .share-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .share-btn {
+            flex: 1;
+            min-height: 48px;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .share-btn-cancel {
+            background: var(--bg-tertiary, #1a1a24);
+            color: var(--text-primary, #f0f0f5);
+        }
+
+        .share-btn-save {
+            background: var(--accent-primary, #00d4ff);
+            color: #000;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--accent-success, #10b981);
+            color: #000;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 500;
+            display: none;
+        }
+
+        .toast.show {
+            display: block;
+            animation: fadeInOut 2s ease;
+        }
+
+        @keyframes fadeInOut {
+
+            0%,
+            100% {
+                opacity: 0;
+            }
+
+            20%,
+            80% {
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="share-container">
+        <h1 class="share-header">📥 Capture from Share</h1>
+
+        <div class="share-preview" id="sharedContent">
+            Loading shared content...
+        </div>
+
+        <div class="share-category">
+            <label for="category">Category</label>
+            <select id="category">
+                <option value="Note">📝 Note</option>
+                <option value="MissionControl">🎯 Mission Control</option>
+                <option value="MicroResearch">🔬 Micro Research</option>
+                <option value="BuildBlock">🧱 Build Block</option>
+                <option value="NightlyDelta">🌙 Nightly Delta</option>
+                <option value="Artifact">📦 Artifact</option>
+                <option value="Brief">📋 Brief</option>
+            </select>
+        </div>
+
+        <div class="share-field">
+            <label for="saveAs">Save As (optional)</label>
+            <input type="text" id="saveAs" placeholder="e.g., ChatGPT_Auth_Flow">
+        </div>
+
+        <div class="share-field">
+            <label for="tags">Tags (comma-separated)</label>
+            <input type="text" id="tags" placeholder="e.g., chatgpt, auth, api">
+        </div>
+
+        <div class="share-actions">
+            <button class="share-btn share-btn-cancel" onclick="cancel()">Cancel</button>
+            <button class="share-btn share-btn-save" onclick="save()">💾 Save</button>
+        </div>
+    </div>
+
+    <div class="toast" id="toast">Saved!</div>
+
+    <script type="module">
+        import { openDB } from './node_modules/idb/build/index.js';
+
+        // Parse shared content from URL params
+        const params = new URLSearchParams(window.location.search);
+        const title = params.get('title') || '';
+        const text = params.get('text') || '';
+        const url = params.get('url') || '';
+
+        // Combine shared content
+        let content = '';
+        if (title) content += title + '\n\n';
+        if (text) content += text + '\n\n';
+        if (url) content += url;
+        content = content.trim();
+
+        if (!content) {
+            content = '(No content shared)';
+        }
+
+        document.getElementById('sharedContent').textContent = content;
+
+        // Generate ID
+        function generateId() {
+            return Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+        }
+
+        // Cancel
+        window.cancel = function () {
+            window.location.href = './index.html';
+        };
+
+        // Save to IndexedDB
+        window.save = async function () {
+            const category = document.getElementById('category').value;
+            const saveAs = document.getElementById('saveAs').value.trim();
+            const tagsRaw = document.getElementById('tags').value.trim();
+            const tags = tagsRaw ? tagsRaw.split(',').map(t => t.trim()).filter(Boolean) : [];
+
+            const entry = {
+                id: generateId(),
+                createdAt: new Date().toISOString(),
+                source: 'share',
+                route: 'logs',
+                category: category,
+                saveAs: saveAs,
+                tags: tags,
+                content: content,
+            };
+
+            try {
+                const db = await openDB('commander-db', 2, {
+                    upgrade(database) {
+                        if (!database.objectStoreNames.contains('documents')) {
+                            database.createObjectStore('documents', { keyPath: 'id' });
+                        }
+                    }
+                });
+
+                // Load current document
+                let doc = await db.get('documents', 'main');
+                if (!doc) {
+                    doc = { id: 'main', inbox: [], next: [], shipToday: [], logs: [] };
+                }
+                if (!doc.logs) doc.logs = [];
+
+                // Add entry to logs (newest first)
+                doc.logs.unshift(entry);
+                doc.updatedAt = Date.now();
+
+                await db.put('documents', doc);
+
+                // Show toast
+                const toast = document.getElementById('toast');
+                toast.classList.add('show');
+
+                // Vibrate if available
+                if (navigator.vibrate) navigator.vibrate(50);
+
+                // Redirect after animation
+                setTimeout(() => {
+                    window.location.href = './index.html';
+                }, 1500);
+
+            } catch (err) {
+                alert('Failed to save: ' + err.message);
+            }
+        };
+    </script>
+</body>
+
+</html>

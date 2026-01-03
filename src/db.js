@@ -7,7 +7,7 @@
 import { openDB } from 'idb';
 
 const DB_NAME = 'commander-db';
-const DB_VERSION = 1;
+const DB_VERSION = 2; // Upgraded for logs support
 const STORE_NAME = 'documents';
 const PENDING_STORE = 'pending';
 
@@ -22,15 +22,20 @@ export async function initDB() {
     if (db) return db;
 
     db = await openDB(DB_NAME, DB_VERSION, {
-        upgrade(database) {
-            // Main document store
+        upgrade(database, oldVersion, newVersion) {
+            console.log(`[DB] Upgrading from v${oldVersion} to v${newVersion}`);
+
+            // Main document store (v1)
             if (!database.objectStoreNames.contains(STORE_NAME)) {
                 database.createObjectStore(STORE_NAME, { keyPath: 'id' });
             }
-            // Pending writes store for crash recovery
+            // Pending writes store for crash recovery (v1)
             if (!database.objectStoreNames.contains(PENDING_STORE)) {
                 database.createObjectStore(PENDING_STORE, { keyPath: 'id' });
             }
+
+            // v2: logs field added to document - no schema change needed
+            // logs are stored as an array field in the main document
         },
     });
 
@@ -132,6 +137,7 @@ export async function importState(data) {
         inbox: Array.isArray(data.inbox) ? data.inbox : [],
         next: Array.isArray(data.next) ? data.next : [],
         shipToday: Array.isArray(data.shipToday) ? data.shipToday : [],
+        logs: Array.isArray(data.logs) ? data.logs : [],
     };
 
     await saveDocument(doc);
@@ -146,5 +152,7 @@ export function createDefaultDocument() {
         inbox: [],
         next: [],
         shipToday: [],
+        logs: [],
     };
 }
+

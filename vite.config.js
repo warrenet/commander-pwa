@@ -1,8 +1,14 @@
 import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
+// Build timestamp for version tracking
+const BUILD_VERSION = new Date().toISOString();
+
 export default defineConfig({
   base: './',
+  define: {
+    '__BUILD_VERSION__': JSON.stringify(BUILD_VERSION),
+  },
   plugins: [
     VitePWA({
       registerType: 'autoUpdate',
@@ -15,7 +21,8 @@ export default defineConfig({
         background_color: '#0a0a0f',
         display: 'standalone',
         orientation: 'portrait',
-        start_url: '/',
+        start_url: './',
+        scope: './',
         icons: [
           {
             src: 'icons/icon-192.png',
@@ -33,7 +40,16 @@ export default defineConfig({
             type: 'image/png',
             purpose: 'maskable'
           }
-        ]
+        ],
+        share_target: {
+          action: './share.html',
+          method: 'GET',
+          params: {
+            title: 'title',
+            text: 'text',
+            url: 'url'
+          }
+        }
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
@@ -61,4 +77,3 @@ export default defineConfig({
     sourcemap: false
   }
 });
-

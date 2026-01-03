@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -7,56 +8,129 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="description" content="Commander - Your daily execution cockpit">
-  
+
   <title>Commander</title>
-  
-  <link rel="icon" type="image/png" href="/icons/icon-192.png">
-  <link rel="apple-touch-icon" href="/icons/icon-192.png">
+
+  <link rel="icon" type="image/png" href="./icons/icon-192.png">
+  <link rel="apple-touch-icon" href="./icons/icon-192.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="./style.css">
 </head>
+
 <body>
   <!-- Status Bar -->
   <header class="status-bar">
-    <div class="status-title">⚡ Commander</div>
-    <div class="status-indicator" id="saveStatus">Ready</div>
+    <div class="status-left">
+      <span class="status-title">⚡ Commander</span>
+      <span class="offline-indicator" id="offlineIndicator" hidden>🟢 Offline Ready</span>
+    </div>
+    <div class="status-right">
+      <span class="today-shipped" id="todayShipped">0 shipped</span>
+      <span class="status-indicator" id="saveStatus">Ready</span>
+    </div>
   </header>
 
-  <!-- Main Content -->
+  <!-- Main Content: Tasks View -->
   <main class="commander-container" id="commander">
     <!-- Sections rendered by JS -->
   </main>
 
+  <!-- Main Content: Capture View -->
+  <main class="capture-container" id="captureView" hidden>
+    <!-- Capture Input Area -->
+    <section class="capture-input-section">
+      <textarea id="captureTextarea" class="capture-textarea" placeholder="Paste or type anything here..."
+        rows="6"></textarea>
+
+      <div class="capture-actions">
+        <button class="capture-btn capture-btn-paste" id="pasteBtn">
+          📋 Paste
+        </button>
+
+        <div class="capture-route-select">
+          <label for="routeSelect">Save to:</label>
+          <select id="routeSelect" class="route-select">
+            <option value="logs">📝 Logs</option>
+            <option value="inbox">📥 Inbox</option>
+            <option value="next">📋 Next</option>
+            <option value="shipToday">🚀 Ship Today</option>
+          </select>
+        </div>
+
+        <button class="capture-btn capture-btn-save" id="saveLogBtn">
+          💾 Save
+        </button>
+      </div>
+      <div class="capture-templates">
+        <button class="capture-btn capture-btn-template" id="templateBtn">
+          📋 New from Template
+        </button>
+      </div>
+    </section>
+
+    <!-- Search -->
+    <section class="logs-search-section">
+      <input type="search" id="logsSearch" class="logs-search-input" placeholder="🔍 Search logs...">
+    </section>
+
+    <!-- Recent Logs List -->
+    <section class="logs-list-section">
+      <h3 class="logs-list-header">
+        Recent Logs <span class="logs-count" id="logsCount">0</span>
+      </h3>
+      <ul class="logs-list" id="logsList">
+        <!-- Rendered by JS -->
+      </ul>
+    </section>
+  </main>
+
   <!-- Bottom Action Bar -->
   <nav class="action-bar">
+    <button class="action-btn action-btn-tab active" data-action="view-tasks" aria-label="Tasks View">
+      <span class="action-icon">📋</span>
+      <span class="action-label">Tasks</span>
+    </button>
     <button class="action-btn" data-action="add-inbox" aria-label="Add to Inbox">
       <span class="action-icon">+</span>
       <span class="action-label">Inbox</span>
     </button>
-    <button class="action-btn" data-action="add-next" aria-label="Add to Next">
-      <span class="action-icon">+</span>
-      <span class="action-label">Next</span>
-    </button>
     <button class="action-btn action-btn-primary" data-action="add-ship" aria-label="Add to Ship Today">
       <span class="action-icon">🚀</span>
       <span class="action-label">Ship</span>
+    </button>
+    <button class="action-btn action-btn-tab" data-action="view-capture" aria-label="Capture View">
+      <span class="action-icon">📝</span>
+      <span class="action-label">Capture</span>
     </button>
     <button class="action-btn action-btn-menu" data-action="menu" aria-label="Menu">
       <span class="action-icon">⋮</span>
     </button>
   </nav>
 
-  <!-- Context Menu (Move/Delete) -->
+  <!-- Context Menu (Move/Delete/Ship) -->
   <div class="context-menu" id="contextMenu" hidden>
     <div class="context-menu-header">Move to:</div>
     <button class="context-btn" data-move="inbox">📥 Inbox</button>
     <button class="context-btn" data-move="next">📋 Next</button>
     <button class="context-btn" data-move="shipToday">🚀 Ship Today</button>
     <hr class="context-divider">
+    <button class="context-btn context-btn-success" data-action="mark-shipped">✅ Mark as Shipped</button>
+    <hr class="context-divider">
     <button class="context-btn context-btn-danger" data-action="delete">🗑️ Delete</button>
     <button class="context-btn" data-action="cancel">Cancel</button>
+  </div>
+
+  <!-- Log Context Menu -->
+  <div class="context-menu" id="logContextMenu" hidden>
+    <div class="context-menu-header">Log Actions:</div>
+    <button class="context-btn" data-log-action="copy">📋 Copy Content</button>
+    <button class="context-btn" data-log-action="send-inbox">📥 Send to Inbox</button>
+    <button class="context-btn" data-log-action="send-ship">🚀 Send to Ship</button>
+    <hr class="context-divider">
+    <button class="context-btn context-btn-danger" data-log-action="delete">🗑️ Delete Log</button>
+    <button class="context-btn" data-log-action="cancel">Cancel</button>
   </div>
 
   <!-- Menu Modal -->
@@ -69,9 +143,13 @@
       <div class="modal-body">
         <button class="menu-btn" data-action="export-md">📄 Export as Markdown</button>
         <button class="menu-btn" data-action="export-json">💾 Export as JSON</button>
-        <button class="menu-btn" data-action="import-json">📂 Import JSON</button>
+        <hr class="menu-divider">
+        <button class="menu-btn menu-btn-primary" data-action="backup">📦 Export Full Backup</button>
+        <button class="menu-btn" data-action="restore">📂 Restore from Backup</button>
         <hr class="menu-divider">
         <button class="menu-btn" data-action="undo">↩️ Undo Last Action</button>
+        <hr class="menu-divider">
+        <button class="menu-btn" data-action="view-shipped">🚀 View Shipped Items</button>
         <hr class="menu-divider">
         <button class="menu-btn menu-btn-danger" data-action="clear-all">🗑️ Clear All (Confirm)</button>
       </div>
@@ -94,9 +172,48 @@
     </div>
   </div>
 
+  <!-- Ship Modal -->
+  <div class="modal-overlay" id="shipOverlay" hidden>
+    <div class="modal">
+      <div class="modal-header">
+        <h2>🚀 Mark as Shipped</h2>
+        <button class="modal-close" data-action="close-ship">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="ship-field">
+          <label for="shipSaveAs">Save As (required)</label>
+          <input type="text" id="shipSaveAs" placeholder="e.g., Auth_Flow_v1">
+        </div>
+        <div class="ship-field">
+          <label for="shipDoD">Definition of Done (required)</label>
+          <input type="text" id="shipDoD" placeholder="e.g., PR merged, tests pass">
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-cancel" data-action="cancel-ship">Cancel</button>
+          <button class="btn btn-primary" data-action="confirm-ship">🚀 Ship It!</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Template Modal -->
+  <div class="modal-overlay" id="templateOverlay" hidden>
+    <div class="modal">
+      <div class="modal-header">
+        <h2>📋 Choose Template</h2>
+        <button class="modal-close" data-action="close-template">×</button>
+      </div>
+      <div class="modal-body" id="templateList">
+        <!-- Rendered by JS -->
+      </div>
+    </div>
+  </div>
+
   <!-- Hidden file input for import -->
   <input type="file" id="importInput" accept=".json" hidden>
+  <input type="file" id="restoreInput" accept=".json" hidden>
 
-  <script type="module" src="/src/main.js"></script>
+  <script type="module" src="./src/main.js"></script>
 </body>
+
 </html>
