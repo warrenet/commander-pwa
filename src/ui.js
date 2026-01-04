@@ -5,11 +5,6 @@
  */
 
 import {
-    getState,
-    getSaveStatus,
-    getCurrentView,
-    setCurrentView,
-    subscribe,
     getState, getSaveStatus, getCurrentView, setCurrentView, subscribe,
     addItem, updateItem, deleteItem, moveItem, clearAll,
     undo, canUndo, importFromJSON, addLog, deleteLog, getLogs, searchLogs,
@@ -111,8 +106,6 @@ export function initUI() {
     pasteBtnEl.addEventListener('click', handlePaste);
     saveLogBtnEl.addEventListener('click', handleSaveLog);
 
-    saveLogBtnEl.addEventListener('click', handleSaveLog);
-
     // Bind Template Button
     if (templateBtnEl) {
         templateBtnEl.addEventListener('click', openTemplateModal);
@@ -136,14 +129,6 @@ export function initUI() {
 
     // Bind search input
     logsSearchEl.addEventListener('input', handleSearchInput);
-
-    // Bind template button
-    const templateBtn = document.getElementById('templateBtn');
-    if (templateBtn) templateBtn.addEventListener('click', openTemplateModal);
-
-    // Bind Daily Debrief Button in menu (via dynamic injection or helper)
-    // We do this by observing the menu overlay or just patching openMenu
-    // Actually, simpler: we patched copyDailyDebrief into the menu creation log below.
 
     // Bind restore file input
     const restoreInput = document.getElementById('restoreInput');
@@ -179,7 +164,6 @@ export function initUI() {
     updateConnectionStatus();
 
     // Initial render
-    render(getState(), getSaveStatus(), getCurrentView());
     render(getState(), getSaveStatus(), getCurrentView());
 }
 
@@ -679,6 +663,8 @@ function handleVoiceCapture() {
     captureTextareaEl.setAttribute('placeholder', 'Listening...');
 
     // Handling results
+    let startValue = captureTextareaEl.value;
+    if (startValue && !startValue.endsWith(' ')) startValue += ' ';
     let finalTranscript = '';
 
     recognition.onresult = (event) => {
