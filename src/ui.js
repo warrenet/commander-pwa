@@ -217,7 +217,21 @@ function render(state, saveStatus, currentView) {
     // Update today shipped count
     updateTodayShipped();
 
-    // Show/hide views
+    // View Transitions API
+    if (document.startViewTransition) {
+        document.startViewTransition(() => {
+            updateView(currentView, state);
+        });
+    } else {
+        // Fallback for older browsers
+        updateView(currentView, state);
+    }
+}
+
+/**
+ * Helper to actual update DOM for views
+ */
+function updateView(currentView, state) {
     if (currentView === 'capture') {
         commanderEl.hidden = true;
         captureViewEl.hidden = false;
