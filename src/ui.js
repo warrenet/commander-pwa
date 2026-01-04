@@ -50,6 +50,7 @@ let longPressTimeout = null;
 let confirmCallback = null;
 let searchQuery = '';
 let tasksViewMode = 'list'; // 'list' or 'board'
+let activeTagFilter = null; // Currently filtered tag
 let shipItem = null; // Item being shipped
 
 const LONG_PRESS_MS = 500;
@@ -171,6 +172,9 @@ export function initUI() {
     // Initial check
     updateConnectionStatus();
 
+    // Global keyboard shortcuts
+    document.addEventListener('keydown', handleKeyboardShortcuts);
+
     // Initial render
     render(getState(), getSaveStatus(), getCurrentView());
 }
@@ -287,8 +291,29 @@ function renderTasksView(state) {
     // Full render when not editing
     commanderEl.innerHTML = '';
 
+    // Show filter indicator if active
+    if (activeTagFilter) {
+        const filterBar = document.createElement('div');
+        filterBar.className = 'filter-bar';
+        filterBar.innerHTML = `
+            <span>Filtering: <strong>#${activeTagFilter}</strong></span>
+            <button class="filter-clear-btn">✕ Clear</button>
+        `;
+        filterBar.querySelector('.filter-clear-btn').addEventListener('click', clearTagFilter);
+        commanderEl.appendChild(filterBar);
+    }
+
     ['inbox', 'next', 'shipToday'].forEach(section => {
-        const sectionEl = renderSection(section, state[section]);
+        // Apply filter if active
+        let items = state[section];
+        if (activeTagFilter) {
+            items = items.filter(item =>
+                item.tags && item.tags.some(t =>
+                    t.replace('#', '').toLowerCase() === activeTagFilter
+                )
+            );
+        }
+        const sectionEl = renderSection(section, items);
         commanderEl.appendChild(sectionEl);
     });
 }
@@ -511,6 +536,23 @@ function renderItem(section, item) {
     });
 
     li.appendChild(content);
+
+    // Tags (clickable)
+    if (item.tags && item.tags.length > 0) {
+        const tagsEl = document.createElement('div');
+        tagsEl.className = 'item-tags';
+        item.tags.forEach(tag => {
+            const tagEl = document.createElement('span');
+            tagEl.className = 'item-tag';
+            tagEl.textContent = tag.startsWith('#') ? tag : `#${tag}`;
+            tagEl.addEventListener('click', (e) => {
+                e.stopPropagation();
+                filterByTag(tag);
+            });
+            tagsEl.appendChild(tagEl);
+        });
+        li.appendChild(tagsEl);
+    }
 
     // Long press handling
     const startLongPress = () => {
@@ -1595,3 +1637,95 @@ Analyze my day based on these execution logs.
 }
 
 
+/**
+ * Handle global keyboard shortcuts
+ * @param {KeyboardEvent} e
+ */
+function handleKeyboardShortcuts(e) {
+    // Ignore if typing in an input/textarea
+    const tag = e.target.tagName.toLowerCase();
+    if (tag === 'input' || tag === 'textarea' || e.target.isContentEditable) {
+        // Still handle Escape to blur
+        if (e.key === 'Escape') {
+            e.target.blur();
+        }
+        return;
+    }
+
+    // Escape - close any open modal/menu
+    if (e.key === 'Escape') {
+        closeMenu();
+        closeConfirm();
+        closeContextMenu();
+        closeShipModal();
+        closeTemplateModal();
+        return;
+    }
+
+    // n - New capture (go to capture view)
+    if (e.key === 'n' || e.key === 'N') {
+        e.preventDefault();
+        setCurrentView('capture');
+        setTimeout(() => captureTextareaEl?.focus(), 100);
+        showToast('New capture', 'info');
+        return;
+    }
+
+    // 1, 2, 3 - Scroll to section
+    if (e.key === '1') {
+        scrollToSection('inbox');
+        showToast('📥 Inbox', 'info');
+        return;
+    }
+    if (e.key === '2') {
+        scrollToSection('next');
+        showToast('📋 Next', 'info');
+        return;
+    }
+    if (e.key === '3') {
+        scrollToSection('shipToday');
+        showToast('🚀 Ship Today', 'info');
+        return;
+    }
+
+    // ? or h - Show help
+    if (e.key === '?' || e.key === 'h') {
+        showToast('Shortcuts: n=new, 1/2/3=sections, Esc=close', 'info');
+        return;
+    }
+
+    // b - Toggle board view
+    if (e.key === 'b' || e.key === 'B') {
+        toggleTasksViewMode();
+        return;
+    }
+}
+
+/**
+ * Scroll to a specific section
+ */
+function scrollToSection(sectionKey) {
+    const section = document.querySelector(`[data-section="${sectionKey}"]`);
+    if (section) {
+        section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+}
+
+/**
+ * Filter items by tag
+ */
+function filterByTag(tag) {
+    const normalizedTag = tag.replace('#', '').toLowerCase();
+    activeTagFilter = normalizedTag;
+    showToast(`Filtering: #${normalizedTag}`, 'info');
+    render(getState(), getSaveStatus(), 'tasks');
+}
+
+/**
+ * Clear tag filter
+ */
+function clearTagFilter() {
+    activeTagFilter = null;
+    showToast('Filter cleared');
+    render(getState(), getSaveStatus(), 'tasks');
+}
