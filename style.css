@@ -1133,3 +1133,109 @@ body {
   font-size: var(--font-size-sm);
   font-weight: 500;
 }
+
+/* ===========================================
+   BOARD VIEW
+   =========================================== */
+.view-toggle {
+  background: transparent;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 8px;
+  margin-right: 8px;
+  border-radius: 50%;
+  transition: background 0.2s;
+  vertical-align: middle;
+}
+
+.view-toggle:hover {
+  background: var(--bg-tertiary);
+}
+
+.board-container {
+  display: flex;
+  gap: var(--space-md);
+  overflow-x: auto;
+  padding: var(--space-md);
+  height: calc(100vh - var(--status-bar-height) - var(--action-bar-height));
+  scroll-snap-type: x mandatory;
+}
+
+.board-column {
+  min-width: 300px;
+  max-width: 300px;
+  background: var(--bg-secondary);
+  border-radius: 12px;
+  padding: var(--space-sm);
+  display: flex;
+  flex-direction: column;
+  scroll-snap-align: center;
+  border: 1px solid var(--border-color);
+}
+
+.board-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-sm) var(--space-md);
+  margin-bottom: var(--space-sm);
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.board-title {
+  font-size: var(--font-size-lg);
+}
+
+.board-count {
+  background: var(--bg-tertiary);
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: var(--font-size-sm);
+}
+
+.board-items {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 var(--space-xs);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+/* Card Styling (enhances .commander-item) */
+.board-card {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: var(--space-md);
+  margin-bottom: 0;
+  list-style: none;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.board-card:active {
+  transform: scale(0.98);
+}
+
+/* Column Specifics */
+.board-col-urgent .board-header {
+  color: var(--accent-danger);
+}
+
+.board-col-bug .board-header {
+  color: var(--accent-warning);
+}
+
+.board-col-idea .board-header {
+  color: var(--accent-secondary);
+}
+
+.board-col-meeting .board-header {
+  color: var(--accent-success);
+}
+
+.board-col-shopping .board-header {
+  color: var(--accent-primary);
+}

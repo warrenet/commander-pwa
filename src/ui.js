@@ -13,6 +13,7 @@ import {
 import { downloadMarkdown, downloadJSON, parseImportedJSON, downloadBackup, parseBackupWithMerge } from './export.js';
 import { getTemplateList, getFilledTemplate, TEMPLATES } from './templates.js';
 import { getDiagnostics, SCHEMA_VERSION } from './db.js';
+import { getBoardSections, autoCategorize } from './smart-sorting.js';
 
 // DOM Elements
 let commanderEl;
@@ -48,6 +49,7 @@ let selectedLog = null;
 let longPressTimeout = null;
 let confirmCallback = null;
 let searchQuery = '';
+let tasksViewMode = 'list'; // 'list' or 'board'
 let shipItem = null; // Item being shipped
 
 const LONG_PRESS_MS = 500;
@@ -129,6 +131,12 @@ export function initUI() {
 
     // Bind search input
     logsSearchEl.addEventListener('input', handleSearchInput);
+
+    // Bind View Toggle
+    const viewToggleBtn = document.getElementById('viewToggle');
+    if (viewToggleBtn) {
+        viewToggleBtn.addEventListener('click', toggleTasksViewMode);
+    }
 
     // Bind restore file input
     const restoreInput = document.getElementById('restoreInput');
@@ -241,6 +249,11 @@ function updateTabButtons(currentView) {
  * @param {Object} state
  */
 function renderTasksView(state) {
+    if (tasksViewMode === 'board') {
+        renderBoardView(state);
+        return;
+    }
+
     // Check if an item is currently being edited (has focus)
     const activeElement = document.activeElement;
     const isEditing = activeElement && activeElement.classList.contains('item-content');
@@ -264,6 +277,69 @@ function renderTasksView(state) {
         const sectionEl = renderSection(section, state[section]);
         commanderEl.appendChild(sectionEl);
     });
+}
+
+/**
+ * Render the board view
+ * @param {Object} state
+ */
+function renderBoardView(state) {
+    commanderEl.innerHTML = '';
+
+    // Aggregate items with source section
+    const allItems = [
+        ...state.inbox.map(i => ({ ...i, _section: 'inbox' })),
+        ...state.next.map(i => ({ ...i, _section: 'next' })),
+        ...state.shipToday.map(i => ({ ...i, _section: 'shipToday' }))
+    ];
+
+    const columns = getBoardSections(allItems);
+
+    const container = document.createElement('div');
+    container.className = 'board-container';
+
+    columns.forEach(col => {
+        const colEl = document.createElement('div');
+        colEl.className = 'board-column';
+        colEl.classList.add(`board-col-${col.id}`);
+
+        colEl.innerHTML = `
+            <div class="board-header">
+                <span class="board-title">${col.title}</span>
+                <span class="board-count">${col.items.length}</span>
+            </div>
+        `;
+
+        const listEl = document.createElement('ul');
+        listEl.className = 'board-items';
+
+        col.items.forEach(item => {
+            // Re-use renderItem but with the item's original section
+            const itemEl = renderItem(item._section, item);
+            itemEl.classList.add('board-card');
+            listEl.appendChild(itemEl);
+        });
+
+        colEl.appendChild(listEl);
+        container.appendChild(colEl);
+    });
+
+    commanderEl.appendChild(container);
+}
+
+/**
+ * Toggle between List and Board view
+ */
+function toggleTasksViewMode() {
+    tasksViewMode = tasksViewMode === 'list' ? 'board' : 'list';
+
+    const btn = document.getElementById('viewToggle');
+    if (btn) {
+        btn.textContent = tasksViewMode === 'list' ? '📋' : '📊';
+        btn.setAttribute('title', tasksViewMode === 'list' ? 'Switch to Smart Board' : 'Switch to List');
+    }
+
+    render(getState(), getSaveStatus(), 'tasks');
 }
 
 /**
@@ -751,7 +827,10 @@ function handleSaveLog() {
     const route = routeSelectEl.value;
     const source = 'manual';
 
-    addLog(content, source, route, []);
+    // Auto-categorize manual entries
+    const { tags } = autoCategorize(content);
+
+    addLog(content, source, route, tags);
 
     // Clear textarea
     captureTextareaEl.value = '';
