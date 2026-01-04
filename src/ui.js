@@ -437,7 +437,14 @@ function renderSection(sectionKey, items) {
     if (items.length === 0) {
         const empty = document.createElement('li');
         empty.className = 'section-empty';
-        empty.textContent = 'No items';
+
+        const emptyStates = {
+            inbox: { icon: '📥', text: 'Inbox empty — capture something!' },
+            next: { icon: '🎯', text: 'Nothing queued up' },
+            shipToday: { icon: '🚀', text: 'Ready to ship?' }
+        };
+        const state = emptyStates[sectionKey] || { icon: '📭', text: 'No items' };
+        empty.innerHTML = `<span class="empty-icon">${state.icon}</span><span class="empty-text">${state.text}</span>`;
         list.appendChild(empty);
     } else {
         items.forEach(item => {
@@ -606,15 +613,31 @@ function escapeHtml(str) {
 }
 
 /**
- * Show a temporary toast message
+ * Show a toast notification
  * @param {string} message
+ * @param {'success' | 'error' | 'info' | 'warning'} [type='success']
  */
-function showToast(message) {
+function showToast(message, type = 'success') {
     const toastEl = document.getElementById('toast');
     if (!toastEl) return;
 
-    toastEl.textContent = message;
-    toastEl.classList.add('show');
+    // Icon mapping
+    const icons = {
+        success: '✅',
+        error: '❌',
+        info: 'ℹ️',
+        warning: '⚠️'
+    };
+
+    const icon = icons[type] || icons.success;
+    toastEl.textContent = `${icon} ${message}`;
+    toastEl.className = 'toast show toast-' + type;
+
+    // Haptic feedback
+    if (navigator.vibrate) {
+        navigator.vibrate(type === 'error' ? [50, 50, 50] : 50);
+    }
+
     setTimeout(() => {
         toastEl.classList.remove('show');
     }, 3000);
