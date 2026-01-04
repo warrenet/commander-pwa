@@ -114,6 +114,13 @@ export function initUI() {
     pasteBtnEl.addEventListener('click', handlePaste);
     saveLogBtnEl.addEventListener('click', handleSaveLog);
 
+    // Bind Mic Button
+    const micBtn = document.getElementById('micBtn');
+    if (micBtn && ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)) {
+        micBtn.hidden = false;
+        micBtn.addEventListener('click', handleVoiceCapture);
+    }
+
     // Bind search input
     logsSearchEl.addEventListener('input', handleSearchInput);
 
@@ -150,7 +157,7 @@ export function initUI() {
     // Offline status monitoring
     window.addEventListener('online', updateConnectionStatus);
     window.addEventListener('offline', updateConnectionStatus);
-    
+
     // Initial check
     updateConnectionStatus();
 
@@ -167,7 +174,7 @@ async function updateConnectionStatus() {
     if (!indicator) return;
 
     const isOffline = !navigator.onLine;
-    
+
     if (isOffline) {
         indicator.textContent = '📡 Offline';
         indicator.className = 'offline-indicator offline';
@@ -178,7 +185,7 @@ async function updateConnectionStatus() {
         if (ready) {
             indicator.textContent = '🟢 Ready';
             indicator.className = 'offline-indicator'; // Default is green
-            indicator.hidden = false; 
+            indicator.hidden = false;
         } else {
             indicator.hidden = true;
         }
@@ -521,6 +528,110 @@ async function handlePaste() {
         // Clipboard API not available or permission denied
         alert('📋 Clipboard access not available.\n\nPlease use your keyboard to paste (long-press the textarea and select Paste).');
     }
+}
+
+/**
+ * Handle voice capture
+ */
+function handleVoiceCapture() {
+    const micBtn = document.getElementById('micBtn');
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    if (!SpeechRecognition) return;
+
+    // If already recording, stop
+    if (micBtn.classList.contains('recording')) {
+        // The 'end' event will clean up
+        if (window.recognitionInstance) {
+            window.recognitionInstance.stop();
+        }
+        return;
+    }
+
+    // Start recording
+    const recognition = new SpeechRecognition();
+    window.recognitionInstance = recognition;
+
+    recognition.continuous = false;
+    recognition.interimResults = true;
+    recognition.lang = 'en-US';
+
+    // Visual feedback
+    micBtn.classList.add('recording');
+
+    // Store original placeholder
+    const originalPlaceholder = captureTextareaEl.getAttribute('placeholder');
+    captureTextareaEl.setAttribute('placeholder', 'Listening...');
+
+    // Handling results
+    let finalTranscript = '';
+
+    recognition.onresult = (event) => {
+        let interimTranscript = '';
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+            if (event.results[i].isFinal) {
+                finalTranscript += event.results[i][0].transcript;
+            } else {
+                interimTranscript += event.results[i][0].transcript;
+            }
+        }
+
+        // Update textarea: existing content + new transcript
+        // We append to existing value if it's not empty, adding a space
+        const existing = captureTextareaEl.value;
+        // Simple logic for now: live update the interim
+        // NOTE: This might overwrite manual typing if done concurrently. 
+        // For V1, we assume user is speaking.
+
+        // To avoid complex cursor management, we'll just put the text in.
+        // But to support appending, we need to know where we started.
+        // Let's just append at the end for simplicity.
+        // Actually, let's just use the final result for safety
+    };
+
+    // We only commit on 'end' or 'final' to avoid jitter, 
+    // OR we append to the end.
+    // Better UX: Append as we go.
+
+    // Re-impl for simplicity:
+    // Just append the FINAL results. Interim shows in placeholder or separate UI?
+    // Let's dump interim into the textarea but recognize it might flicker.
+
+    // Clean approach:
+    // 1. Save current cursor pos? No.
+    // 2. Just append to the end.
+
+    let startValue = captureTextareaEl.value;
+    if (startValue && !startValue.endsWith(' ')) startValue += ' ';
+
+    recognition.onresult = (event) => {
+        let currentTranscript = '';
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+            currentTranscript += event.results[i][0].transcript;
+        }
+        captureTextareaEl.value = startValue + currentTranscript;
+
+        // Auto scroll to bottom
+        captureTextareaEl.scrollTop = captureTextareaEl.scrollHeight;
+    };
+
+
+    recognition.onend = () => {
+        micBtn.classList.remove('recording');
+        captureTextareaEl.setAttribute('placeholder', originalPlaceholder);
+        window.recognitionInstance = null;
+
+        // Vibrate to signal end
+        if (navigator.vibrate) navigator.vibrate(50);
+    };
+
+    recognition.onerror = (event) => {
+        console.error('Speech recognition error', event.error);
+        micBtn.classList.remove('recording');
+        captureTextareaEl.setAttribute('placeholder', originalPlaceholder);
+    };
+
+    recognition.start();
 }
 
 /**

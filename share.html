@@ -202,6 +202,8 @@
         const text = params.get('text') || '';
         const url = params.get('url') || '';
 
+        const auto = params.get('auto') === 'true';
+
         // Combine shared content
         let content = '';
         if (title) content += title + '\n\n';
@@ -225,6 +227,14 @@
         // Generate ID
         function generateId() {
             return Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+        }
+
+        // Auto-save logic for Automation/MacroDroid
+        if (auto && content) {
+            // Wait for DOM to be ready just in case, then save
+            setTimeout(() => {
+                window.save();
+            }, 100);
         }
 
         // Cancel
