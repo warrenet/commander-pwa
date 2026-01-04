@@ -8,85 +8,12 @@ import { initDB } from './db.js';
 import { initState, setCurrentView } from './state.js';
 import { initUI } from './ui.js';
 import { getFilledTemplate } from './templates.js';
+import { getLaunchParams, applyLaunchParams } from './integrations.js';
 
 // App version (injected at build time)
 const APP_VERSION = typeof __BUILD_VERSION__ !== 'undefined' ? __BUILD_VERSION__ : 'dev';
 
-/**
- * Handle URL-based routing for MacroDroid deep links
- * Supported params:
- * - ?screen=mission-control|micro-research|build-block|nightly-delta|capture|tasks
- * - ?safemode=1 (minimal shell for recovery)
- * - ?autofocus=1 (focus the capture textarea)
- */
-function handleRouting() {
-    const params = new URLSearchParams(window.location.search);
-    const screen = params.get('screen');
-    const safemode = params.get('safemode');
-    const autofocus = params.get('autofocus');
-
-    if (safemode === '1') {
-        console.log('[Commander] Safe mode enabled');
-        return { safemode: true };
-    }
-
-    if (screen) {
-        console.log('[Commander] Deep link to:', screen);
-
-        // Map screen names to views and actions
-        const screenMap = {
-            'mission-control': { view: 'capture', template: 'MissionControl' },
-            'micro-research': { view: 'capture', template: 'MicroResearch' },
-            'build-block': { view: 'capture', template: 'BuildBlock' },
-            'nightly-delta': { view: 'capture', template: 'NightlyDelta' },
-            'capture': { view: 'capture', template: null },
-            'tasks': { view: 'tasks', template: null },
-            'inbox': { view: 'tasks', template: null },
-        };
-
-        return {
-            ...screenMap[screen],
-            autofocus: autofocus === '1',
-            screen
-        };
-    }
-
-    return null;
-}
-
-/**
- * Apply routing after UI is initialized
- */
-function applyRouting(routing) {
-    if (!routing) return;
-
-    if (routing.view === 'capture') {
-        setCurrentView('capture');
-
-        // Fill template if specified
-        if (routing.template) {
-            setTimeout(() => {
-                const textarea = document.getElementById('captureTextarea');
-                if (textarea) {
-                    textarea.value = getFilledTemplate(routing.template, {});
-                    if (routing.autofocus) textarea.focus();
-                }
-            }, 100);
-        } else if (routing.autofocus) {
-            setTimeout(() => {
-                const textarea = document.getElementById('captureTextarea');
-                if (textarea) textarea.focus();
-            }, 100);
-        }
-    } else if (routing.view === 'tasks') {
-        setCurrentView('tasks');
-    }
-
-    // Clear URL params after handling (cleaner UX)
-    if (window.history.replaceState) {
-        window.history.replaceState({}, document.title, window.location.pathname);
-    }
-}
+// [Deleted] Legacy routing functions (replaced by integrations.js)
 
 /**
  * Bootstrap the application
@@ -95,7 +22,7 @@ async function bootstrap() {
     console.log(`[Commander] Starting v${APP_VERSION}...`);
 
     // Check for safe mode first
-    const routing = handleRouting();
+    const routing = getLaunchParams();
     if (routing?.safemode) {
         showSafeMode();
         return;
@@ -115,7 +42,15 @@ async function bootstrap() {
         console.log('[Commander] UI initialized');
 
         // Apply deep link routing
-        applyRouting(routing);
+        applyLaunchParams(routing, setCurrentView);
+
+        // Listen for template events from integrations
+        window.addEventListener('commander-fill-template', (e) => {
+            const textarea = document.getElementById('captureTextarea');
+            if (textarea && e.detail.template) {
+                textarea.value = getFilledTemplate(e.detail.template, {});
+            }
+        });
 
         // Register for visibility change to handle tab switching
         document.addEventListener('visibilitychange', () => {

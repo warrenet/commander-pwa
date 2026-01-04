@@ -329,13 +329,24 @@ export async function importFromJSON(data) {
 export function addLog(content, source = 'manual', route = 'logs', tags = []) {
     storeUndo();
 
+    const trimmed = content.trim();
+
+    // Deduplication: Check if the last log entry has identical content
+    if (state.logs.length > 0) {
+        const lastLog = state.logs[0];
+        if (lastLog.content === trimmed) {
+            console.log('[State] Duplicate log ignored');
+            return lastLog.id;
+        }
+    }
+
     const logEntry = {
         id: generateId(),
         createdAt: new Date().toISOString(),
         source,
         route,
         tags,
-        content: content.trim(),
+        content: trimmed,
     };
 
     // Add to logs array (newest first)

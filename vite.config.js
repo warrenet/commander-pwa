@@ -90,6 +90,13 @@ export default defineConfig({
   ],
   build: {
     outDir: 'dist',
-    sourcemap: false
+    sourcemap: false,
+    rollupOptions: {
+      input: {
+        main: 'index.html',
+        offline: 'offline.html',
+        share: 'share.html'
+      }
+    }
   }
 });

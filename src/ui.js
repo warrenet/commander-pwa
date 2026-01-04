@@ -147,14 +147,42 @@ export function initUI() {
         if (e.target === confirmOverlayEl) closeConfirm();
     });
 
-    // Check offline ready and update indicator
-    checkOfflineReady().then(ready => {
-        const indicator = document.getElementById('offlineIndicator');
-        if (indicator && ready) indicator.hidden = false;
-    });
+    // Offline status monitoring
+    window.addEventListener('online', updateConnectionStatus);
+    window.addEventListener('offline', updateConnectionStatus);
+    
+    // Initial check
+    updateConnectionStatus();
 
     // Initial render
     render(getState(), getSaveStatus(), getCurrentView());
+    render(getState(), getSaveStatus(), getCurrentView());
+}
+
+/**
+ * Update connection status indicator
+ */
+async function updateConnectionStatus() {
+    const indicator = document.getElementById('offlineIndicator');
+    if (!indicator) return;
+
+    const isOffline = !navigator.onLine;
+    
+    if (isOffline) {
+        indicator.textContent = '📡 Offline';
+        indicator.className = 'offline-indicator offline';
+        indicator.hidden = false;
+    } else {
+        // Check if SW is ready (PWA installed/cached)
+        const ready = await checkOfflineReady();
+        if (ready) {
+            indicator.textContent = '🟢 Ready';
+            indicator.className = 'offline-indicator'; // Default is green
+            indicator.hidden = false; 
+        } else {
+            indicator.hidden = true;
+        }
+    }
 }
 
 /**

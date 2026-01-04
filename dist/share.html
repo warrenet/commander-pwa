@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0a0a0f">
+    <title>Commander - Share</title>
+    <style>
+        .share-container {
+            padding: 80px 16px 100px;
+            min-height: 100vh;
+        }
+
+        .share-header {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: var(--text-primary, #f0f0f5);
+        }
+
+        .share-preview {
+            background: var(--bg-secondary, #12121a);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+            max-height: 200px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            font-size: 14px;
+            color: var(--text-secondary, #a0a0b0);
+        }
+
+        .share-category {
+            margin-bottom: 16px;
+        }
+
+        .share-category label {
+            display: block;
+            font-size: 14px;
+            color: var(--text-muted, #606070);
+            margin-bottom: 8px;
+        }
+
+        .share-category select {
+            width: 100%;
+            min-height: 48px;
+            padding: 8px 16px;
+            background: var(--bg-secondary, #12121a);
+            border: 1px solid var(--border-color, #2a2a38);
+            border-radius: 8px;
+            color: var(--text-primary, #f0f0f5);
+            font-size: 16px;
+        }
+
+        .share-field {
+            margin-bottom: 16px;
+        }
+
+        .share-field label {
+            display: block;
+            font-size: 14px;
+            color: var(--text-muted, #606070);
+            margin-bottom: 8px;
+        }
+
+        .share-field input {
+            width: 100%;
+            min-height: 48px;
+            padding: 8px 16px;
+            background: var(--bg-secondary, #12121a);
+            border: 1px solid var(--border-color, #2a2a38);
+            border-radius: 8px;
+            color: var(--text-primary, #f0f0f5);
+            font-size: 16px;
+        }
+
+        .share-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .share-btn {
+            flex: 1;
+            min-height: 48px;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .share-btn-cancel {
+            background: var(--bg-tertiary, #1a1a24);
+            color: var(--text-primary, #f0f0f5);
+        }
+
+        .share-btn-save {
+            background: var(--accent-primary, #00d4ff);
+            color: #000;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--accent-success, #10b981);
+            color: #000;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 500;
+            display: none;
+        }
+
+        .toast.show {
+            display: block;
+            animation: fadeInOut 2s ease;
+        }
+
+        @keyframes fadeInOut {
+
+            0%,
+            100% {
+                opacity: 0;
+            }
+
+            20%,
+            80% {
+                opacity: 1;
+            }
+        }
+    </style>
+  <script type="module" crossorigin src="./assets/share-BybuWk3Z.js"></script>
+  <link rel="modulepreload" crossorigin href="./assets/style-BGs6jjRe.js">
+  <link rel="stylesheet" crossorigin href="./assets/style-v7hvDu_G.css">
+<link rel="manifest" href="./manifest.webmanifest"><script id="vite-plugin-pwa:register-sw" src="./registerSW.js"></script></head>
+
+<body>
+    <div class="share-container">
+        <h1 class="share-header">📥 Capture from Share</h1>
+
+        <div class="share-preview" id="sharedContent">
+            Loading shared content...
+        </div>
+
+        <div class="share-category">
+            <label for="category">Category</label>
+            <select id="category">
+                <option value="Note">📝 Note</option>
+                <option value="MissionControl">🎯 Mission Control</option>
+                <option value="MicroResearch">🔬 Micro Research</option>
+                <option value="BuildBlock">🧱 Build Block</option>
+                <option value="NightlyDelta">🌙 Nightly Delta</option>
+                <option value="Artifact">📦 Artifact</option>
+                <option value="Brief">📋 Brief</option>
+            </select>
+        </div>
+
+        <div class="share-field">
+            <label for="saveAs">Save As (optional)</label>
+            <input type="text" id="saveAs" placeholder="e.g., ChatGPT_Auth_Flow">
+        </div>
+
+        <div class="share-field">
+            <label for="tags">Tags (comma-separated)</label>
+            <input type="text" id="tags" placeholder="e.g., chatgpt, auth, api">
+        </div>
+
+        <div class="share-actions">
+            <button class="share-btn share-btn-cancel" onclick="cancel()">Cancel</button>
+            <button class="share-btn share-btn-save" onclick="save()">💾 Save</button>
+        </div>
+    </div>
+
+    <div class="toast" id="toast">Saved!</div>
+
+</body>
+
+</html>
