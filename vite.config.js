@@ -55,21 +55,9 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
         navigateFallback: './offline.html',
         navigateFallbackDenylist: [/^\/api/, /\.(json|xml|txt)$/],
-        // Explicitly handle share.html with query params
+        // Ignore all URL parameters when matching precached files (fixes offline deep linking)
+        ignoreURLParametersMatching: [/.*/],
         runtimeCaching: [
-          {
-            urlPattern: ({ url }) => url.pathname.includes('share.html'),
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'share-target-cache',
-              cacheableResponse: {
-                statuses: [0, 200]
-              },
-              matchOptions: {
-                ignoreSearch: true
-              }
-            }
-          },
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
             handler: 'CacheFirst',
