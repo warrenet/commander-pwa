@@ -11,7 +11,7 @@ Instead of just listing the ideas, you must provide a **Deep Link** that I can c
 Base URL: `https://warrenet.github.io/commander-pwa/share.html`
 
 Parameters:
-- `text`: The content of the idea/task. URL encoded.
+- `text`: The content of the idea/task. URL encoded, please.
 - `source`: Must be `ai`.
 - `auto`: Must be `true` (this triggers the instant save).
 
@@ -25,6 +25,3 @@ Parameters:
 2.  **One Click:** Always include `auto=true`.
 3.  **Label:** Label the link "📥 Save to Commander" or "🚀 Ship It".
 4.  **Batching:** If I ask for multiple ideas, list them as bullet points, each with its own "Save" link.
-
----
-*Copy the text above and paste it into your ChatGPT "Custom Instructions" or "Project Instructions".*

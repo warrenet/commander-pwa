@@ -121,6 +121,12 @@ export function initUI() {
         templateCloseBtnEl.addEventListener('click', closeTemplateModal);
     }
 
+    // Bind Time Bandit
+    const timerEl = document.getElementById('timeBandit');
+    if (timerEl) {
+        timerEl.addEventListener('click', handleTimeBandit);
+    }
+
     // Bind Mic Button
     const micBtn = document.getElementById('micBtn');
     if (micBtn && ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)) {
@@ -134,6 +140,10 @@ export function initUI() {
     // Bind template button
     const templateBtn = document.getElementById('templateBtn');
     if (templateBtn) templateBtn.addEventListener('click', openTemplateModal);
+
+    // Bind Daily Debrief Button in menu (via dynamic injection or helper)
+    // We do this by observing the menu overlay or just patching openMenu
+    // Actually, simpler: we patched copyDailyDebrief into the menu creation log below.
 
     // Bind restore file input
     const restoreInput = document.getElementById('restoreInput');
@@ -673,50 +683,53 @@ function handleVoiceCapture() {
 
     recognition.onresult = (event) => {
         let interimTranscript = '';
+        let currentTranscript = '';
         for (let i = event.resultIndex; i < event.results.length; ++i) {
             if (event.results[i].isFinal) {
                 finalTranscript += event.results[i][0].transcript;
             } else {
                 interimTranscript += event.results[i][0].transcript;
             }
-        }
-
-        // Update textarea: existing content + new transcript
-        // We append to existing value if it's not empty, adding a space
-        const existing = captureTextareaEl.value;
-        // Simple logic for now: live update the interim
-        // NOTE: This might overwrite manual typing if done concurrently. 
-        // For V1, we assume user is speaking.
-
-        // To avoid complex cursor management, we'll just put the text in.
-        // But to support appending, we need to know where we started.
-        // Let's just append at the end for simplicity.
-        // Actually, let's just use the final result for safety
-    };
-
-    // We only commit on 'end' or 'final' to avoid jitter, 
-    // OR we append to the end.
-    // Better UX: Append as we go.
-
-    // Re-impl for simplicity:
-    // Just append the FINAL results. Interim shows in placeholder or separate UI?
-    // Let's dump interim into the textarea but recognize it might flicker.
-
-    // Clean approach:
-    // 1. Save current cursor pos? No.
-    // 2. Just append to the end.
-
-    let startValue = captureTextareaEl.value;
-    if (startValue && !startValue.endsWith(' ')) startValue += ' ';
-
-    recognition.onresult = (event) => {
-        let currentTranscript = '';
-        for (let i = event.resultIndex; i < event.results.length; ++i) {
             currentTranscript += event.results[i][0].transcript;
         }
-        captureTextareaEl.value = startValue + currentTranscript;
 
-        // Auto scroll to bottom
+        // Protocol Droid Logic (Voice Templates)
+        const protocolRegex = /^(?:protocol|template)\s+(\w+)(?:\s+(.*))?/i;
+        const match = finalTranscript.trim().match(protocolRegex);
+
+        if (match) {
+            const templateKey = match[1].toLowerCase();
+            const restContent = match[2] || '';
+
+            const templates = getTemplateList();
+            const template = templates.find(t =>
+                t.id === templateKey || t.label.toLowerCase().includes(templateKey)
+            );
+
+            if (template) {
+                let filled = template.content;
+                if (restContent) {
+                    if (filled.includes('Context:')) {
+                        filled = filled.replace('Context: ', `Context: ${restContent}`);
+                    } else if (filled.includes('Goal:')) {
+                        filled = filled.replace('Goal: ', `Goal: ${restContent}`);
+                    } else {
+                        filled += `\n${restContent}`;
+                    }
+                }
+
+                captureTextareaEl.value = filled;
+                showToast(`🤖 Protocol Droid: Loaded ${template.label}`);
+                captureTextareaEl.scrollTop = captureTextareaEl.scrollHeight;
+
+                // Reset/stop to prevent overwriting
+                micBtn.classList.remove('recording');
+                window.recognitionInstance.stop();
+                return;
+            }
+        }
+
+        captureTextareaEl.value = startValue + currentTranscript;
         captureTextareaEl.scrollTop = captureTextareaEl.scrollHeight;
     };
 
@@ -1397,7 +1410,139 @@ async function exportDebugBundle() {
     a.click();
     URL.revokeObjectURL(url);
 
+
     closeDiagnostics();
+}
+
+// Auto-inject debug/debrief buttons on load
+(function injectExtraButtons() {
+    // Wait for DOM
+    setTimeout(() => {
+        const menuBody = document.querySelector('#menuOverlay .modal-body');
+        if (menuBody && !document.getElementById('dailyDebriefBtn')) {
+            const weeklyBtn = document.querySelector('[data-action="weekly-export"]');
+            if (weeklyBtn) {
+                const btn = document.createElement('button');
+                btn.id = 'dailyDebriefBtn';
+                btn.className = 'menu-btn';
+                btn.innerHTML = '🧠 Copy Daily Debrief';
+                btn.onclick = copyDailyDebrief;
+                menuBody.insertBefore(btn, weeklyBtn);
+            }
+        }
+    }, 1000);
+})();
+
+/**
+ * THE TIME BANDIT
+ * Focus Timer logic
+ */
+let banditInterval = null;
+let banditTimeRemaining = 0;
+let banditTotalTime = 0;
+
+function handleTimeBandit() {
+    if (banditInterval) {
+        if (confirm('Cancel current session?')) {
+            clearInterval(banditInterval);
+            banditInterval = null;
+            renderTimer(null);
+        }
+        return;
+    }
+
+    const minutes = prompt('Set Focus Timer (minutes):', '25');
+    if (!minutes) return;
+
+    const duration = parseInt(minutes);
+    if (isNaN(duration) || duration <= 0) return;
+
+    startBandit(duration);
+}
+
+function startBandit(minutes) {
+    banditTotalTime = minutes;
+    banditTimeRemaining = minutes * 60;
+
+    renderTimer(banditTimeRemaining);
+
+    if (navigator.vibrate) navigator.vibrate([50, 50, 50]);
+    showToast(`⏳ Focus: ${minutes}m started`);
+
+    banditInterval = setInterval(() => {
+        banditTimeRemaining--;
+        renderTimer(banditTimeRemaining);
+
+        if (banditTimeRemaining <= 0) {
+            finishBandit();
+        }
+    }, 1000);
+}
+
+function finishBandit() {
+    clearInterval(banditInterval);
+    banditInterval = null;
+    renderTimer(null);
+
+    addLog(`✅ Focus Session: ${banditTotalTime}m completed`, 'auto', 'logs', ['#focus']);
+
+    if (navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 500]);
+    alert(`Time's Up! ${banditTotalTime}m Session Logged.`);
+}
+
+function renderTimer(seconds) {
+    const el = document.getElementById('timeBandit');
+    if (!el) return;
+
+    if (seconds === null) {
+        el.textContent = '⏳';
+        el.classList.remove('active');
+        return;
+    }
+
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    el.textContent = `${m}:${s.toString().padStart(2, '0')}`;
+    el.classList.add('active');
+}
+
+/**
+ * DAILY DEBRIEF
+ * Copies logs + prompt for AI
+ */
+async function copyDailyDebrief() {
+    const logs = getLogs();
+
+    const today = new Date().toISOString().split('T')[0];
+    const todaysLogs = logs.filter(l => l.createdAt.startsWith(today));
+
+    if (todaysLogs.length === 0) {
+        showToast('No logs for today.');
+        return;
+    }
+
+    const logText = todaysLogs.map(l =>
+        `- [${new Date(l.createdAt).toLocaleTimeString()}] ${l.content}`
+    ).join('\n');
+
+    const prompt = `DATE: ${today}
+LOGS:
+${logText}
+
+PROMPT:
+Analyze my day based on these execution logs.
+1. What was the highest leverage task?
+2. Where was the friction or wasted time?
+3. Grade my execution (A-F) with a short explanation.
+4. Suggest one improvement for tomorrow.`;
+
+    try {
+        await navigator.clipboard.writeText(prompt);
+        showToast('🧠 Debrief Prompt copied to clipboard!');
+    } catch (err) {
+        console.error('Failed to copy', err);
+        showToast('Failed to copy.');
+    }
 }
 
 
