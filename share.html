@@ -320,6 +320,17 @@
 
                 // Add entry to logs (newest first)
                 doc.logs.unshift(entry);
+
+                // If routed to inbox (AI source), also add as a task
+                if (finalRoute === 'inbox') {
+                    if (!doc.inbox) doc.inbox = [];
+                    doc.inbox.unshift({
+                        id: entry.id,
+                        text: entry.content,
+                        createdAt: entry.createdAt
+                    });
+                }
+
                 doc.updatedAt = Date.now();
 
                 await new Promise((resolve, reject) => {
