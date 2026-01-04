@@ -1065,3 +1065,32 @@ body {
   color: var(--accent-success);
   font-weight: 500;
 }
+
+/* ===========================================
+   DIAGNOSTICS PANEL
+   =========================================== */
+.diag-section {
+  margin-bottom: var(--space-md);
+}
+
+.diag-item {
+  display: flex;
+  justify-content: space-between;
+  padding: var(--space-sm) 0;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.diag-item:last-child {
+  border-bottom: none;
+}
+
+.diag-label {
+  color: var(--text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.diag-value {
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+}

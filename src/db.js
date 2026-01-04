@@ -7,9 +7,12 @@
 import { openDB } from 'idb';
 
 const DB_NAME = 'commander-db';
-const DB_VERSION = 2; // Upgraded for logs support
+const DB_VERSION = 3; // v3: schema versioning + shipped array
 const STORE_NAME = 'documents';
 const PENDING_STORE = 'pending';
+
+// Current schema version for document structure
+export const SCHEMA_VERSION = 3;
 
 /** @type {import('idb').IDBPDatabase | null} */
 let db = null;
@@ -33,13 +36,67 @@ export async function initDB() {
             if (!database.objectStoreNames.contains(PENDING_STORE)) {
                 database.createObjectStore(PENDING_STORE, { keyPath: 'id' });
             }
-
-            // v2: logs field added to document - no schema change needed
-            // logs are stored as an array field in the main document
         },
     });
 
+    // Run schema migrations after DB is open
+    await runMigrations();
+
     return db;
+}
+
+/**
+ * Run document-level schema migrations
+ */
+async function runMigrations() {
+    const doc = await db.get(STORE_NAME, 'main');
+    if (!doc) return; // No document yet, nothing to migrate
+
+    let needsSave = false;
+    const migrated = { ...doc };
+
+    // Migration: Add schemaVersion if missing
+    if (!migrated.schemaVersion) {
+        console.log('[DB] Migrating: Adding schemaVersion');
+        migrated.schemaVersion = 1;
+        needsSave = true;
+    }
+
+    // Migration v1 → v2: Ensure logs array exists
+    if (migrated.schemaVersion < 2) {
+        console.log('[DB] Migrating v1 → v2: Ensuring logs array');
+        if (!Array.isArray(migrated.logs)) {
+            migrated.logs = [];
+        }
+        migrated.schemaVersion = 2;
+        needsSave = true;
+    }
+
+    // Migration v2 → v3: Ensure shipped array exists
+    if (migrated.schemaVersion < 3) {
+        console.log('[DB] Migrating v2 → v3: Ensuring shipped array');
+        if (!Array.isArray(migrated.shipped)) {
+            migrated.shipped = [];
+        }
+        // Ensure all items have IDs (prevent duplicate ID crashes)
+        ['inbox', 'next', 'shipToday'].forEach(section => {
+            if (Array.isArray(migrated[section])) {
+                migrated[section] = migrated[section].map((item, idx) => {
+                    if (!item.id) {
+                        return { ...item, id: `migrated_${section}_${idx}_${Date.now()}` };
+                    }
+                    return item;
+                });
+            }
+        });
+        migrated.schemaVersion = 3;
+        needsSave = true;
+    }
+
+    if (needsSave) {
+        console.log('[DB] Saving migrated document');
+        await saveDocument(migrated);
+    }
 }
 
 /**
@@ -53,6 +110,7 @@ export async function saveDocument(doc) {
 
     await tx.store.put({
         id: 'main',
+        schemaVersion: SCHEMA_VERSION,
         ...doc,
         updatedAt: Date.now(),
     });
@@ -134,10 +192,12 @@ export async function importState(data) {
     }
 
     const doc = {
+        schemaVersion: SCHEMA_VERSION,
         inbox: Array.isArray(data.inbox) ? data.inbox : [],
         next: Array.isArray(data.next) ? data.next : [],
         shipToday: Array.isArray(data.shipToday) ? data.shipToday : [],
         logs: Array.isArray(data.logs) ? data.logs : [],
+        shipped: Array.isArray(data.shipped) ? data.shipped : [],
     };
 
     await saveDocument(doc);
@@ -149,10 +209,36 @@ export async function importState(data) {
  */
 export function createDefaultDocument() {
     return {
+        schemaVersion: SCHEMA_VERSION,
         inbox: [],
         next: [],
         shipToday: [],
         logs: [],
+        shipped: [],
     };
 }
 
+/**
+ * Get database diagnostics info
+ * @returns {Promise<Object>}
+ */
+export async function getDiagnostics() {
+    try {
+        const doc = await loadDocument();
+        return {
+            dbName: DB_NAME,
+            dbVersion: DB_VERSION,
+            schemaVersion: doc?.schemaVersion || 'unknown',
+            itemCounts: {
+                inbox: doc?.inbox?.length || 0,
+                next: doc?.next?.length || 0,
+                shipToday: doc?.shipToday?.length || 0,
+                logs: doc?.logs?.length || 0,
+                shipped: doc?.shipped?.length || 0,
+            },
+            lastUpdated: doc?.updatedAt ? new Date(doc.updatedAt).toISOString() : 'never',
+        };
+    } catch (err) {
+        return { error: err.message };
+    }
+}

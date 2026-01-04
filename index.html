@@ -151,6 +151,9 @@
         <hr class="menu-divider">
         <button class="menu-btn" data-action="view-shipped">🚀 View Shipped Items</button>
         <hr class="menu-divider">
+        <button class="menu-btn" data-action="diagnostics">🛠️ Diagnostics</button>
+        <button class="menu-btn" data-action="weekly-export">📅 Weekly Export for AI</button>
+        <hr class="menu-divider">
         <button class="menu-btn menu-btn-danger" data-action="clear-all">🗑️ Clear All (Confirm)</button>
       </div>
     </div>
@@ -205,6 +208,44 @@
       </div>
       <div class="modal-body" id="templateList">
         <!-- Rendered by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Diagnostics Modal -->
+  <div class="modal-overlay" id="diagOverlay" hidden>
+    <div class="modal">
+      <div class="modal-header">
+        <h2>🛠️ Diagnostics</h2>
+        <button class="modal-close" data-action="close-diag">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="diag-section">
+          <div class="diag-item">
+            <span class="diag-label">App Version:</span>
+            <span class="diag-value" id="diagVersion">-</span>
+          </div>
+          <div class="diag-item">
+            <span class="diag-label">Schema Version:</span>
+            <span class="diag-value" id="diagSchema">-</span>
+          </div>
+          <div class="diag-item">
+            <span class="diag-label">Service Worker:</span>
+            <span class="diag-value" id="diagSW">-</span>
+          </div>
+          <div class="diag-item">
+            <span class="diag-label">Last Updated:</span>
+            <span class="diag-value" id="diagUpdated">-</span>
+          </div>
+          <div class="diag-item">
+            <span class="diag-label">Items:</span>
+            <span class="diag-value" id="diagCounts">-</span>
+          </div>
+        </div>
+        <hr class="menu-divider">
+        <button class="menu-btn" data-action="check-update">🔄 Check for Update</button>
+        <button class="menu-btn" data-action="export-debug">📊 Export Debug Bundle</button>
+        <button class="menu-btn menu-btn-danger" data-action="reset-cache">🗑️ Reset Cache (Last Resort)</button>
       </div>
     </div>
   </div>

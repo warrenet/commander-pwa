@@ -175,7 +175,26 @@
     <div class="toast" id="toast">Saved!</div>
 
     <script type="module">
-        import { openDB } from './node_modules/idb/build/index.js';
+        // Inline IDB - no external imports for production compatibility
+        const DB_NAME = 'commander-db';
+        const DB_VERSION = 3;
+
+        function openDatabase() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(DB_NAME, DB_VERSION);
+                request.onerror = () => reject(request.error);
+                request.onsuccess = () => resolve(request.result);
+                request.onupgradeneeded = (event) => {
+                    const db = event.target.result;
+                    if (!db.objectStoreNames.contains('documents')) {
+                        db.createObjectStore('documents', { keyPath: 'id' });
+                    }
+                    if (!db.objectStoreNames.contains('pending')) {
+                        db.createObjectStore('pending', { keyPath: 'id' });
+                    }
+                };
+            });
+        }
 
         // Parse shared content from URL params
         const params = new URLSearchParams(window.location.search);
@@ -189,6 +208,13 @@
         if (text) content += text + '\n\n';
         if (url) content += url;
         content = content.trim();
+
+        // Sanitize content (prevent XSS)
+        function sanitize(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
 
         if (!content) {
             content = '(No content shared)';
@@ -221,30 +247,43 @@
                 category: category,
                 saveAs: saveAs,
                 tags: tags,
-                content: content,
+                content: sanitize(content),
             };
 
             try {
-                const db = await openDB('commander-db', 2, {
-                    upgrade(database) {
-                        if (!database.objectStoreNames.contains('documents')) {
-                            database.createObjectStore('documents', { keyPath: 'id' });
-                        }
-                    }
-                });
+                const db = await openDatabase();
 
                 // Load current document
-                let doc = await db.get('documents', 'main');
+                const tx = db.transaction('documents', 'readwrite');
+                const store = tx.objectStore('documents');
+
+                let doc = await new Promise((resolve, reject) => {
+                    const req = store.get('main');
+                    req.onsuccess = () => resolve(req.result);
+                    req.onerror = () => reject(req.error);
+                });
+
                 if (!doc) {
-                    doc = { id: 'main', inbox: [], next: [], shipToday: [], logs: [] };
+                    doc = { id: 'main', inbox: [], next: [], shipToday: [], logs: [], shipped: [], schemaVersion: 3 };
                 }
                 if (!doc.logs) doc.logs = [];
+
+                // Dedupe check - don't save if same content exists in last 5 entries
+                const isDupe = doc.logs.slice(0, 5).some(log => log.content === entry.content);
+                if (isDupe) {
+                    alert('This content was already saved recently.');
+                    return;
+                }
 
                 // Add entry to logs (newest first)
                 doc.logs.unshift(entry);
                 doc.updatedAt = Date.now();
 
-                await db.put('documents', doc);
+                await new Promise((resolve, reject) => {
+                    const putReq = store.put(doc);
+                    putReq.onsuccess = () => resolve();
+                    putReq.onerror = () => reject(putReq.error);
+                });
 
                 // Show toast
                 const toast = document.getElementById('toast');

@@ -33,6 +33,15 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Validate Build
+        run: |
+          echo "Checking build output..."
+          test -f dist/index.html || exit 1
+          test -f dist/offline.html || exit 1
+          test -f dist/share.html || exit 1
+          test -d dist/assets || exit 1
+          echo "Build validation passed!"
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:

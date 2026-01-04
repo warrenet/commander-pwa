@@ -28,7 +28,8 @@ import {
     checkOfflineReady,
 } from './state.js';
 import { downloadMarkdown, downloadJSON, parseImportedJSON, downloadBackup, parseBackupWithMerge } from './export.js';
-import { getTemplateList, getFilledTemplate } from './templates.js';
+import { getTemplateList, getFilledTemplate, TEMPLATES } from './templates.js';
+import { getDiagnostics, SCHEMA_VERSION } from './db.js';
 
 // DOM Elements
 let commanderEl;
@@ -728,6 +729,24 @@ function handleAction(e) {
         case 'close-template':
             closeTemplateModal();
             break;
+        case 'diagnostics':
+            openDiagnostics();
+            break;
+        case 'close-diag':
+            closeDiagnostics();
+            break;
+        case 'weekly-export':
+            exportWeeklyForAI();
+            break;
+        case 'check-update':
+            checkForUpdate();
+            break;
+        case 'reset-cache':
+            resetCache();
+            break;
+        case 'export-debug':
+            exportDebugBundle();
+            break;
     }
 }
 
@@ -980,4 +999,161 @@ function showShippedItems() {
 
 // Export openShipModal so context menu can use it
 window.openShipModal = openShipModal;
+
+// App version (injected at build time)
+const APP_VERSION = typeof __BUILD_VERSION__ !== 'undefined' ? __BUILD_VERSION__ : 'dev';
+
+/**
+ * Open diagnostics modal
+ */
+async function openDiagnostics() {
+    const overlay = document.getElementById('diagOverlay');
+    if (!overlay) return;
+
+    // Get diagnostics
+    const diag = await getDiagnostics();
+
+    document.getElementById('diagVersion').textContent = APP_VERSION.split('T')[0] || 'dev';
+    document.getElementById('diagSchema').textContent = `v${diag.schemaVersion || 'unknown'}`;
+    document.getElementById('diagUpdated').textContent = diag.lastUpdated?.split('T')[0] || 'never';
+
+    const counts = diag.itemCounts || {};
+    document.getElementById('diagCounts').textContent =
+        `${counts.inbox || 0} inbox, ${counts.next || 0} next, ${counts.logs || 0} logs`;
+
+    // Check SW status
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.ready.then(reg => {
+            document.getElementById('diagSW').textContent = reg.active ? '🟢 Active' : '🟡 Waiting';
+        }).catch(() => {
+            document.getElementById('diagSW').textContent = '🔴 Error';
+        });
+    } else {
+        document.getElementById('diagSW').textContent = '⚪ Not supported';
+    }
+
+    overlay.hidden = false;
+    closeMenu();
+}
+
+/**
+ * Close diagnostics modal
+ */
+function closeDiagnostics() {
+    const overlay = document.getElementById('diagOverlay');
+    if (overlay) overlay.hidden = true;
+}
+
+/**
+ * Export last 7 days logs for AI consumption
+ */
+function exportWeeklyForAI() {
+    const state = getState();
+    const logs = state.logs || [];
+
+    // Get logs from last 7 days
+    const weekAgo = new Date();
+    weekAgo.setDate(weekAgo.getDate() - 7);
+
+    const recentLogs = logs.filter(log => {
+        const created = new Date(log.createdAt);
+        return created >= weekAgo;
+    });
+
+    if (recentLogs.length === 0) {
+        alert('No logs from the past 7 days.');
+        return;
+    }
+
+    // Format for AI consumption
+    let output = `# Commander Weekly Export\n`;
+    output += `Exported: ${new Date().toISOString()}\n`;
+    output += `Period: Last 7 days (${recentLogs.length} entries)\n\n`;
+    output += `---\n\n`;
+
+    recentLogs.forEach(log => {
+        const date = new Date(log.createdAt).toLocaleString();
+        const category = log.category || 'Note';
+        output += `## [${category}] ${log.saveAs || 'Untitled'} — ${date}\n\n`;
+        output += log.content + '\n\n';
+        output += `---\n\n`;
+    });
+
+    // Copy to clipboard
+    navigator.clipboard.writeText(output).then(() => {
+        alert(`Copied ${recentLogs.length} logs to clipboard!\n\nPaste into ChatGPT for analysis.`);
+        closeMenu();
+    }).catch(() => {
+        // Fallback: download as file
+        const blob = new Blob([output], { type: 'text/markdown' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `commander-weekly-${new Date().toISOString().split('T')[0]}.md`;
+        a.click();
+        URL.revokeObjectURL(url);
+        closeMenu();
+    });
+}
+
+/**
+ * Check for service worker update
+ */
+async function checkForUpdate() {
+    if ('serviceWorker' in navigator) {
+        const reg = await navigator.serviceWorker.ready;
+        await reg.update();
+        alert('Update check complete. If an update is available, it will install automatically.');
+    } else {
+        alert('Service workers not supported.');
+    }
+}
+
+/**
+ * Reset cache (last resort)
+ */
+async function resetCache() {
+    if (!confirm('This will clear cached files. Your data will NOT be lost. Continue?')) {
+        return;
+    }
+
+    try {
+        if ('caches' in window) {
+            const names = await caches.keys();
+            await Promise.all(names.map(n => caches.delete(n)));
+        }
+        alert('Cache cleared. Reloading...');
+        location.reload();
+    } catch (err) {
+        alert('Failed to clear cache: ' + err.message);
+    }
+}
+
+/**
+ * Export debug bundle (sanitized diagnostics)
+ */
+async function exportDebugBundle() {
+    const diag = await getDiagnostics();
+
+    const bundle = {
+        exportedAt: new Date().toISOString(),
+        appVersion: APP_VERSION,
+        schemaVersion: SCHEMA_VERSION,
+        diagnostics: diag,
+        userAgent: navigator.userAgent,
+        online: navigator.onLine,
+        serviceWorker: 'serviceWorker' in navigator,
+    };
+
+    const blob = new Blob([JSON.stringify(bundle, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `commander-debug-${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+
+    closeDiagnostics();
+}
+
 
