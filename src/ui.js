@@ -10,22 +10,10 @@ import {
     getCurrentView,
     setCurrentView,
     subscribe,
-    addItem,
-    updateItem,
-    deleteItem,
-    moveItem,
-    clearAll,
-    undo,
-    canUndo,
-    importFromJSON,
-    addLog,
-    deleteLog,
-    getLogs,
-    searchLogs,
-    markShipped,
-    getTodayShipped,
-    importMerged,
-    checkOfflineReady,
+    getState, getSaveStatus, getCurrentView, setCurrentView, subscribe,
+    addItem, updateItem, deleteItem, moveItem, clearAll,
+    undo, canUndo, importFromJSON, addLog, deleteLog, getLogs, searchLogs,
+    markShipped, getTodayShipped, importMerged, checkOfflineReady, clearLogs,
 } from './state.js';
 import { downloadMarkdown, downloadJSON, parseImportedJSON, downloadBackup, parseBackupWithMerge } from './export.js';
 import { getTemplateList, getFilledTemplate, TEMPLATES } from './templates.js';
@@ -49,6 +37,15 @@ let routeSelectEl;
 let logsSearchEl;
 let logsListEl;
 let logsCountEl;
+
+// New DOM elements for template and capture
+const menuCloseBtnEl = document.querySelector('[data-action="close-menu"]');
+
+// Template elements
+const templateBtnEl = document.getElementById('templateBtn');
+const templateOverlayEl = document.getElementById('templateOverlay');
+const templateListEl = document.getElementById('templateList');
+const templateCloseBtnEl = document.querySelector('[data-action="close-template"]');
 
 // State
 let selectedItem = null;
@@ -113,6 +110,16 @@ export function initUI() {
     // Bind capture buttons
     pasteBtnEl.addEventListener('click', handlePaste);
     saveLogBtnEl.addEventListener('click', handleSaveLog);
+
+    saveLogBtnEl.addEventListener('click', handleSaveLog);
+
+    // Bind Template Button
+    if (templateBtnEl) {
+        templateBtnEl.addEventListener('click', openTemplateModal);
+    }
+    if (templateCloseBtnEl) {
+        templateCloseBtnEl.addEventListener('click', closeTemplateModal);
+    }
 
     // Bind Mic Button
     const micBtn = document.getElementById('micBtn');
@@ -515,18 +522,116 @@ function escapeHtml(str) {
 }
 
 /**
+ * Show a temporary toast message
+ * @param {string} message
+ */
+function showToast(message) {
+    const toastEl = document.getElementById('toast');
+    if (!toastEl) return;
+
+    toastEl.textContent = message;
+    toastEl.classList.add('show');
+    setTimeout(() => {
+        toastEl.classList.remove('show');
+    }, 3000);
+}
+
+/**
  * Handle paste button
  */
 async function handlePaste() {
     try {
         const text = await navigator.clipboard.readText();
-        if (text) {
-            captureTextareaEl.value = text;
-            captureTextareaEl.focus();
+        if (!text) return;
+
+        // Smart Batch Paste Logic
+        const lines = text.split('\n').map(l => l.trim()).filter(l => l);
+
+        // Detect bullet points: lines starting with -, *, or 1.
+        const bulletRegex = /^(\-|\*|\d+\.)\s+/;
+        const potentialItems = lines.filter(l => bulletRegex.test(l));
+
+        if (potentialItems.length > 1) {
+            const doSplit = confirm(`Detected ${potentialItems.length} list items. Split them into separate Inbox tasks?`);
+
+            if (doSplit) {
+                potentialItems.forEach(line => {
+                    // Remove the bullet
+                    const cleanText = line.replace(bulletRegex, '').trim();
+                    if (cleanText) {
+                        addItem('inbox', cleanText);
+                    }
+                });
+                showToast(`✅ Added ${potentialItems.length} items to Inbox`);
+
+                // Switch to tasks view to show result
+                setCurrentView('tasks');
+
+                // Vibrate
+                if (navigator.vibrate) navigator.vibrate(50);
+                return;
+            }
         }
+
+        // Standard paste
+        captureTextareaEl.value = text;
+        captureTextareaEl.focus();
     } catch (err) {
-        // Clipboard API not available or permission denied
-        alert('📋 Clipboard access not available.\n\nPlease use your keyboard to paste (long-press the textarea and select Paste).');
+        console.error('Failed to read clipboard:', err);
+        alert('Permission to read clipboard denied.');
+    }
+}
+
+/**
+ * Open Template Modal
+ */
+function openTemplateModal() {
+    renderTemplateList();
+    templateOverlayEl.hidden = false;
+}
+
+/**
+ * Close Template Modal
+ */
+function closeTemplateModal() {
+    templateOverlayEl.hidden = true;
+}
+
+/**
+ * Render Template List
+ */
+function renderTemplateList() {
+    const templates = getTemplateList();
+    templateListEl.innerHTML = '';
+
+    const grid = document.createElement('div');
+    grid.style.cssText = 'display: grid; gap: 12px; grid-template-columns: repeat(2, 1fr);';
+
+    templates.forEach(t => {
+        const btn = document.createElement('button');
+        btn.className = 'menu-btn';
+        btn.style.cssText = 'height: 100px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; text-align: center;';
+        btn.innerHTML = `
+            <span style="font-size: 24px;">${t.icon}</span>
+            <span>${t.label}</span>
+        `;
+        btn.onclick = () => selectTemplate(t.id);
+        grid.appendChild(btn);
+    });
+
+    templateListEl.appendChild(grid);
+}
+
+/**
+ * Select a template
+ * @param {string} id
+ */
+function selectTemplate(id) {
+    const content = getFilledTemplate(id);
+    if (content) {
+        captureTextareaEl.value = content;
+        closeTemplateModal();
+        captureTextareaEl.focus();
     }
 }
 
