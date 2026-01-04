@@ -1155,6 +1155,10 @@ function handleAction(e) {
             closeMenu();
             window.location.href = './ai-setup.html';
             break;
+        case 'automations':
+            closeMenu();
+            window.location.href = './automations.html';
+            break;
         case 'onboarding':
             closeMenu();
             showOnboarding();

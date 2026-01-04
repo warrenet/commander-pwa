@@ -12,7 +12,8 @@ export default defineConfig({
         main: 'index.html',
         share: 'share.html',
         offline: 'offline.html',
-        ai_setup: 'ai-setup.html'
+        ai_setup: 'ai-setup.html',
+        automations: 'automations.html'
       }
     }
   },
@@ -115,16 +116,5 @@ export default defineConfig({
         ]
       }
     })
-  ],
-  build: {
-    outDir: 'dist',
-    sourcemap: false,
-    rollupOptions: {
-      input: {
-        main: 'index.html',
-        offline: 'offline.html',
-        share: 'share.html'
-      }
-    }
-  }
+  ]
 });

@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0a0a0f">
+    <title>Commander - Automations</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #0a0a0f;
+            color: #f0f0f5;
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            color: #a0a0b0;
+            margin-bottom: 24px;
+            font-size: 14px;
+        }
+
+        h2 {
+            font-size: 18px;
+            margin: 24px 0 12px;
+            color: #00d4ff;
+        }
+
+        .link-card {
+            background: #12121a;
+            border: 1px solid #2a2a38;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+
+        .link-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .link-url {
+            font-family: monospace;
+            font-size: 11px;
+            color: #00d4ff;
+            background: #1a1a24;
+            padding: 8px;
+            border-radius: 6px;
+            word-break: break-all;
+            margin-bottom: 12px;
+        }
+
+        .link-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .btn:active {
+            opacity: 0.7;
+        }
+
+        .btn-copy {
+            background: #00d4ff;
+            color: #000;
+        }
+
+        .btn-open {
+            background: #1a1a24;
+            color: #f0f0f5;
+            border: 1px solid #2a2a38;
+        }
+
+        .guide {
+            background: #12121a;
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 24px;
+        }
+
+        .guide h3 {
+            font-size: 16px;
+            margin-bottom: 12px;
+        }
+
+        .guide ol {
+            padding-left: 20px;
+            color: #a0a0b0;
+            font-size: 14px;
+        }
+
+        .guide li {
+            margin-bottom: 8px;
+        }
+
+        .guide code {
+            background: #1a1a24;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 24px;
+            color: #00d4ff;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #10b981;
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+
+        .toast.show {
+            opacity: 1;
+        }
+    </style>
+<link rel="manifest" href="./manifest.webmanifest"><script id="vite-plugin-pwa:register-sw" src="./registerSW.js"></script></head>
+
+<body>
+    <div class="container">
+        <h1>🔗 Automations</h1>
+        <p class="subtitle">Deep links for MacroDroid, Shortcuts, and quick access</p>
+
+        <h2>📱 Quick Launch Links</h2>
+
+        <div class="link-card">
+            <div class="link-title">🎯 Morning Mission Control</div>
+            <div class="link-url" id="url-mission">https://warrenet.github.io/commander-pwa/?screen=mission-control
+            </div>
+            <div class="link-actions">
+                <button class="btn btn-copy" onclick="copyUrl('url-mission')">📋 Copy</button>
+                <button class="btn btn-open" onclick="openUrl('url-mission')">🚀 Open</button>
+            </div>
+        </div>
+
+        <div class="link-card">
+            <div class="link-title">🔬 Micro Research Sprint</div>
+            <div class="link-url" id="url-research">https://warrenet.github.io/commander-pwa/?screen=micro-research
+            </div>
+            <div class="link-actions">
+                <button class="btn btn-copy" onclick="copyUrl('url-research')">📋 Copy</button>
+                <button class="btn btn-open" onclick="openUrl('url-research')">🚀 Open</button>
+            </div>
+        </div>
+
+        <div class="link-card">
+            <div class="link-title">🔨 Daily Build Block</div>
+            <div class="link-url" id="url-build">https://warrenet.github.io/commander-pwa/?screen=build-block</div>
+            <div class="link-actions">
+                <button class="btn btn-copy" onclick="copyUrl('url-build')">📋 Copy</button>
+                <button class="btn btn-open" onclick="openUrl('url-build')">🚀 Open</button>
+            </div>
+        </div>
+
+        <div class="link-card">
+            <div class="link-title">🌙 Nightly System Delta</div>
+            <div class="link-url" id="url-nightly">https://warrenet.github.io/commander-pwa/?screen=nightly-delta</div>
+            <div class="link-actions">
+                <button class="btn btn-copy" onclick="copyUrl('url-nightly')">📋 Copy</button>
+                <button class="btn btn-open" onclick="openUrl('url-nightly')">🚀 Open</button>
+            </div>
+        </div>
+
+        <div class="link-card">
+            <div class="link-title">⚡ Quick Capture (Autofocus)</div>
+            <div class="link-url" id="url-capture">https://warrenet.github.io/commander-pwa/?screen=capture&autofocus=1
+            </div>
+            <div class="link-actions">
+                <button class="btn btn-copy" onclick="copyUrl('url-capture')">📋 Copy</button>
+                <button class="btn btn-open" onclick="openUrl('url-capture')">🚀 Open</button>
+            </div>
+        </div>
+
+        <div class="link-card">
+            <div class="link-title">🛡️ Safe Mode (Recovery)</div>
+            <div class="link-url" id="url-safe">https://warrenet.github.io/commander-pwa/?safemode=1</div>
+            <div class="link-actions">
+                <button class="btn btn-copy" onclick="copyUrl('url-safe')">📋 Copy</button>
+                <button class="btn btn-open" onclick="openUrl('url-safe')">🚀 Open</button>
+            </div>
+        </div>
+
+        <div class="guide">
+            <h3>📲 MacroDroid Setup</h3>
+            <ol>
+                <li>Open <strong>MacroDroid</strong> and create a new macro</li>
+                <li>Set <strong>Trigger</strong>: Widget Button, Time, or NFC</li>
+                <li>Add <strong>Action</strong>: Applications → Open Website/URL</li>
+                <li>Paste the URL from above (e.g., <code>?screen=mission-control</code>)</li>
+                <li>Enable <strong>"Open in Chrome/Browser"</strong></li>
+                <li>Save and add widget to home screen</li>
+            </ol>
+        </div>
+
+        <div class="guide" style="margin-top: 12px;">
+            <h3>🤖 AI Share Link</h3>
+            <p style="color: #a0a0b0; font-size: 13px; margin-bottom: 8px;">
+                For ChatGPT/Gemini to send tasks directly:
+            </p>
+            <div class="link-url" id="url-ai" style="margin-bottom: 0;">
+                https://warrenet.github.io/commander-pwa/share.html?text=YOUR_TASK&source=ai&auto=true
+            </div>
+        </div>
+
+        <a href="./index.html" class="back-link">← Back to Commander</a>
+    </div>
+
+    <div class="toast" id="toast">Copied!</div>
+
+    <script>
+        function copyUrl(id) {
+            const el = document.getElementById(id);
+            navigator.clipboard.writeText(el.textContent.trim()).then(() => {
+                showToast('✅ Copied to clipboard!');
+            });
+        }
+
+        function openUrl(id) {
+            const el = document.getElementById(id);
+            window.open(el.textContent.trim(), '_blank');
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2000);
+        }
+    </script>
+</body>
+
+</html>

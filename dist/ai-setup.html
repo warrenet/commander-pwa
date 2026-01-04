@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0a0a0f">
+    <title>Commander - AI Setup</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #0a0a0f;
+            color: #f0f0f5;
+            min-height: 100vh;
+            padding: 24px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .subtitle {
+            color: #a0a0b0;
+            margin-bottom: 32px;
+        }
+
+        h2 {
+            font-size: 20px;
+            margin: 32px 0 16px;
+            color: #00d4ff;
+        }
+
+        .card {
+            background: #12121a;
+            border: 1px solid #2a2a38;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .prompt-box {
+            background: #1a1a24;
+            border-radius: 8px;
+            padding: 16px;
+            font-family: monospace;
+            font-size: 13px;
+            color: #00d4ff;
+            margin: 12px 0;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .copy-btn {
+            background: linear-gradient(135deg, #00d4ff, #7c3aed);
+            border: none;
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            width: 100%;
+            transition: opacity 0.2s;
+        }
+
+        .copy-btn:active {
+            opacity: 0.8;
+        }
+
+        .qr-section {
+            text-align: center;
+            padding: 24px;
+        }
+
+        .qr-placeholder {
+            width: 200px;
+            height: 200px;
+            background: #fff;
+            border-radius: 12px;
+            margin: 16px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 100px;
+        }
+
+        .bookmarklet {
+            display: inline-block;
+            background: #22222e;
+            border: 2px dashed #00d4ff;
+            padding: 12px 24px;
+            border-radius: 8px;
+            color: #00d4ff;
+            text-decoration: none;
+            font-weight: 500;
+            cursor: grab;
+        }
+
+        .bookmarklet:hover {
+            background: #2a2a38;
+        }
+
+        .instructions {
+            color: #a0a0b0;
+            font-size: 14px;
+            margin-top: 8px;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 32px;
+            color: #00d4ff;
+            text-decoration: none;
+        }
+
+        .tag {
+            display: inline-block;
+            font-size: 11px;
+            padding: 2px 8px;
+            background: #1a1a24;
+            border-radius: 12px;
+            color: #a0a0b0;
+            margin-left: 8px;
+        }
+    </style>
+<link rel="manifest" href="./manifest.webmanifest"><script id="vite-plugin-pwa:register-sw" src="./registerSW.js"></script></head>
+
+<body>
+    <div class="container">
+        <h1>🤖 AI Integration Hub</h1>
+        <p class="subtitle">Connect Commander to your favorite AI assistants</p>
+
+        <h2>📋 Copy-Paste Prompts</h2>
+        <p class="instructions">Give these instructions to your AI assistant. When it generates tasks, it will format
+            them as Commander links.</p>
+
+        <!-- Gemini -->
+        <div class="card">
+            <div class="card-title">✨ Google Gemini <span class="tag">Recommended</span></div>
+            <div class="prompt-box" id="geminiPrompt">When I ask you to add something to my task list, respond with a
+                clickable link in this format:
+
+                [Add to
+                Commander](https://warrenet.github.io/commander-pwa/share.html?text=YOUR_TASK_HERE&source=ai&auto=true)
+
+                Replace YOUR_TASK_HERE with the URL-encoded task text. Add &priority=high for urgent items,
+                &category=work for work items.
+
+                Example: If I say "remind me to call mom", respond with:
+                [Add to
+                Commander](https://warrenet.github.io/commander-pwa/share.html?text=Call+mom&source=ai&auto=true)</div>
+            <button class="copy-btn" onclick="copyPrompt('geminiPrompt')">📋 Copy Gemini Prompt</button>
+        </div>
+
+        <!-- ChatGPT -->
+        <div class="card">
+            <div class="card-title">💬 ChatGPT</div>
+            <div class="prompt-box" id="chatgptPrompt">You are my task assistant. When I mention adding a task or
+                reminder, generate a Commander link:
+
+                Format: https://warrenet.github.io/commander-pwa/share.html?text=[TASK]&source=ai&auto=true
+
+                URL-encode the task text. Optional params:
+                - &priority=high (for urgent)
+                - &category=work (for work tasks)
+
+                Always provide the link in markdown format so I can click it.</div>
+            <button class="copy-btn" onclick="copyPrompt('chatgptPrompt')">📋 Copy ChatGPT Prompt</button>
+        </div>
+
+        <!-- Claude -->
+        <div class="card">
+            <div class="card-title">🎭 Claude</div>
+            <div class="prompt-box" id="claudePrompt">When I ask you to create a task or reminder, format your response
+                as a Commander deep link:
+
+                Base URL: https://warrenet.github.io/commander-pwa/share.html
+                Required params: ?text=[URL_ENCODED_TASK]&source=ai&auto=true
+                Optional: &priority=high, &category=work
+
+                Make the link clickable in your response.</div>
+            <button class="copy-btn" onclick="copyPrompt('claudePrompt')">📋 Copy Claude Prompt</button>
+        </div>
+
+        <h2>📱 Mobile Quick Setup</h2>
+        <div class="card qr-section">
+            <p>Scan this QR code to open Commander on your phone:</p>
+            <div class="qr-placeholder">📱</div>
+            <p class="instructions">Or visit: <code>warrenet.github.io/commander-pwa</code></p>
+        </div>
+
+        <h2>🔖 Desktop Bookmarklet</h2>
+        <div class="card">
+            <p>Drag this button to your bookmarks bar:</p>
+            <br>
+            <a class="bookmarklet"
+                href="javascript:(function(){var t=prompt('Quick capture:');if(t){window.open('https://warrenet.github.io/commander-pwa/share.html?text='+encodeURIComponent(t)+'&source=bookmarklet&auto=true','_blank')}})();">
+                ⚡ Quick Capture
+            </a>
+            <p class="instructions">Click it on any page to instantly capture a thought to Commander.</p>
+        </div>
+
+        <h2>🔧 MacroDroid (Android Automation)</h2>
+        <div class="card">
+            <p>Create a macro with these settings:</p>
+            <div class="prompt-box">Trigger: Widget Button
+                Action: Open URL
+                URL: https://warrenet.github.io/commander-pwa/share.html?text=[user_input]&source=macrodroid&auto=true
+
+                Enable "Show input dialog" and use {user_input} variable.</div>
+            <button class="copy-btn" onclick="copyPrompt('macrodroid')">📋 Copy MacroDroid URL</button>
+        </div>
+
+        <a href="./index.html" class="back-link">← Back to Commander</a>
+    </div>
+
+    <script>
+        function copyPrompt(id) {
+            const el = document.getElementById(id);
+            const text = el ? el.textContent : '';
+            navigator.clipboard.writeText(text).then(() => {
+                alert('✅ Copied to clipboard!');
+            }).catch(() => {
+                alert('Failed to copy. Please select and copy manually.');
+            });
+        }
+    </script>
+</body>
+
+</html>
