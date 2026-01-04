@@ -159,6 +159,8 @@
         <hr class="menu-divider">
         <button class="menu-btn" data-action="diagnostics">🛠️ Diagnostics</button>
         <button class="menu-btn" data-action="weekly-export">📅 Weekly Export for AI</button>
+        <button class="menu-btn" data-action="ai-setup">🤖 AI Integration Hub</button>
+        <button class="menu-btn" data-action="onboarding">📚 Getting Started Guide</button>
         <hr class="menu-divider">
         <button class="menu-btn menu-btn-danger" data-action="clear-all">🗑️ Clear All (Confirm)</button>
       </div>
@@ -259,6 +261,51 @@
   <!-- Hidden file input for import -->
   <input type="file" id="importInput" accept=".json" hidden>
   <input type="file" id="restoreInput" accept=".json" hidden>
+
+  <!-- Onboarding Modal -->
+  <div class="modal-overlay" id="onboardingOverlay" hidden>
+    <div class="modal onboarding-modal">
+      <div class="modal-header">
+        <h2>⚡ Welcome to Commander</h2>
+        <button class="modal-close" data-action="close-onboarding">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="onboarding-steps">
+          <div class="onboarding-step">
+            <span class="step-icon">📥</span>
+            <div class="step-content">
+              <strong>Inbox</strong>: Capture ideas fast. Press <kbd>n</kbd> or tap +
+            </div>
+          </div>
+          <div class="onboarding-step">
+            <span class="step-icon">📋</span>
+            <div class="step-content">
+              <strong>Next</strong>: Your queued tasks. Long-press to move items.
+            </div>
+          </div>
+          <div class="onboarding-step">
+            <span class="step-icon">🚀</span>
+            <div class="step-content">
+              <strong>Ship Today</strong>: Commit to finishing. Mark done when shipped.
+            </div>
+          </div>
+          <div class="onboarding-step">
+            <span class="step-icon">📊</span>
+            <div class="step-content">
+              <strong>Smart Board</strong>: Press <kbd>b</kbd> for auto-organized columns.
+            </div>
+          </div>
+          <div class="onboarding-step">
+            <span class="step-icon">🤖</span>
+            <div class="step-content">
+              <strong>AI Integration</strong>: Menu → 🤖 AI Integration Hub
+            </div>
+          </div>
+        </div>
+        <button class="btn btn-primary onboarding-done" data-action="close-onboarding">Got it!</button>
+      </div>
+    </div>
+  </div>
 
   <script type="module" src="./src/main.js"></script>
 </body>

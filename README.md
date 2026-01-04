@@ -1,68 +1,52 @@
-# Commander PWA
+# Commander PWA ⚡
 
-**Titan Prompt Commander** is a sovereign, offline-first execution cockpit designed for high-reliability daily operations. It serves as a "no-fail" surface for capturing thoughts, managing immediate priorities, and ensuring daily shipping targets are met, regardless of network conditions.
+**Commander** is a sovereign, offline-first execution cockpit designed for high-reliability daily operations. It serves as a "no-fail" surface for capturing thoughts, managing priorities, and ensuring daily shipping targets are met.
 
-## 🎯 What This Is
-Commander is a **Progressive Web App (PWA)** that acts as your primary interface for "getting things done" on mobile. It replaces the friction of complex project management tools with a streamlined, text-based interface optimized for speed and capture.
+**Current Version:** v1.6.3 (The "Cyborg" Update)
 
-It solves the problem of "capture friction" — the delay between having a thought and recording it. By living locally on your device and using the system share sheet, Commander accepts input instantly, even in airplane mode.
+## ✨ New Features (v1.6+)
 
-## ✨ Key Benefits
+### 🧠 AI & Smart Features
+- **Smart Board:** Auto-organizes your tasks into columns (Urgent, Bugs, Ideas, Meetings) based on content.
+- **Auto-Categorization:** Type "fix bug" -> `#bug` tag added automatically.
+- **Protocol Droid:** Voice capture templates (say "Protocol Bug" -> fills bug template).
+- **AI Integration Hub:** Pre-made prompts to connect Gemini/ChatGPT to Commander via deep links.
 
-### 1. 🛡️ Unbreakable Reliability (Offline-First)
-- **Zero Latency:** Built on a local-first architecture (IndexedDB + Workbox). Interactions happen instantly on your device, not on a remote server.
-- **Works Anywhere:** Capture ideas in the subway, on a plane, or in a dead zone. The app automatically syncs and persists data locally.
-- **No Spinners:** You never wait for a network request to finish before moving to the next task.
+### ⚡ Speed & Workflow
+- **Keyboard Shortcuts:** `n` (new), `1/2/3` (sections), `b` (board), `Esc` (close).
+- **Tag Filtering:** Click any tag to filter your view instantly.
+- **Deep Linking:** Share from any app to capture URLs with auto-tags (`&source=ai`, `&priority=high`).
 
-### 2. ⚡ Speed & Friction Reduction
-- **Universal Capture:** A dedicated view for rapid-fire entry of thoughts, tasks, and logs.
-- **Share Target:** deep integration with Android allows you to "Share to Commander" from any other app (browser, YouTube, Twitter) to capture URLs and content instantly.
-- **Large Touch Targets:** A UI designed specifically for thumbs and movement, minimizing mis-taps.
+### 🎨 Visual & UX
+- **Rich Toasts:** Visual feedback with icons and haptics.
+- **View Transitions:** Smooth fading between List and Board views.
+- **Swipe Indicators:** Helpful hints for horizontal navigation.
 
-### 3. 🔐 Data Sovereignty
-- **Your Data:** All data resides on your device. You are not dependent on a SaaS provider's uptime or privacy policy.
-- **Standard Standards:** Export your data anytime to JSON or Markdown. No lock-in.
-
-### 4. 🧠 Focused Workflow
-- **The "Ship Today" List:** A constrained list for your absolute top priorities, forcing focus on what matters now.
-- **Inbox Zero:** Easy drag-and-drop triage to move items from Inbox to Next or Ship, keeping your mental RAM clear.
-
-## 🛣️ Roadmap & Future Upgrades
-
-We are actively evolving Commander into a full "AI Partner" interface.
-
-- **Phase 1: Hardening (Current)** ✅
-    - Offline resilience, conflict resolution, diagnostics, and deployment automation.
-- **Phase 2: AI Agent Integration** 🚧
-    - **Active Inference:** The app will proactively suggest tasks or reorganize your inbox based on your habits.
-    - **LLM Context:** Feed your logs into local or cloud LLMs to generate weekly summaries and "Tree of Thought" planning.
-- **Phase 3: Multi-Modal** 🔮
-    - **Voice Mode:** One-tap voice capture with local transcription.
-    - **Image Analysis:** Snap photos of whiteboards/notebooks and have them auto-transcribed into tasks.
-- **Phase 4: Sync & Federation** 🌐
-    - **P2P Sync:** Sync between desktop and mobile without a central cloud server.
-    - **Team Mode:** Shared encrypted workspaces for small squads.
-
-## Architecture
-
-*   **Runtime:** Browser / PWA (installable)
-*   **Build:** Vite + Rollup
-*   **State:** Custom Reactive Store + IDB
-*   **Deploy:** GitHub Pages (Self-contained)
-
-## Usage
+## 🚀 Getting Started
 
 ### Installation
 1.  Navigate to the deployed URL.
-2.  Tap **Install App** in your browser menu.
-3.  Launch from home screen as a standalone app.
+2.  Tap **"Install App"** (or "Add to Home Screen").
+3.  Launch from your home screen.
 
-### The "Ship" Workflow
-Use the included `ship.ps1` to deploy updates:
-```powershell
-.\ship.ps1
-```
-This script validates your environment, builds the app, checks for offline artifacts, and pushes to GitHub Pages in one go.
+### First Run
+- Follow the **Onboarding Tutorial** to learn the basics.
+- Go to **Menu -> 🦾 AI Integration Hub** to set up your AI assistants.
+
+## 🛠️ Architecture
+- **Offline-First:** IndexedDB + Workbox (100% functional offline).
+- **Zero-Latency:** Immediate interactions, no spinners.
+- **Data Sovereignty:** All data lives on your device. Export to JSON/Markdown anytime.
+
+## ⌨️ Shortcuts (Desktop)
+| Key | Action |
+|-----|--------|
+| `n` | New Capture |
+| `b` | Toggle Board View |
+| `1` | Jump to Inbox |
+| `2` | Jump to Next |
+| `3` | Jump to Ship Today |
+| `Esc`| Close / Blur |
 
 ## License
 Private / Internal Tools.

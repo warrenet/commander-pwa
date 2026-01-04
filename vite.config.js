@@ -6,6 +6,16 @@ const BUILD_VERSION = new Date().toISOString();
 
 export default defineConfig({
   base: './',
+  build: {
+    rollupOptions: {
+      input: {
+        main: 'index.html',
+        share: 'share.html',
+        offline: 'offline.html',
+        ai_setup: 'ai-setup.html'
+      }
+    }
+  },
   define: {
     '__BUILD_VERSION__': JSON.stringify(BUILD_VERSION),
   },

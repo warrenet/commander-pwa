@@ -1410,3 +1410,56 @@ body {
 .filter-clear-btn:hover {
   background: rgba(255, 255, 255, 0.3);
 }
+
+/* ===========================================
+   ONBOARDING MODAL
+   =========================================== */
+.onboarding-modal {
+  max-width: 420px;
+}
+
+.onboarding-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.onboarding-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 12px;
+  background: var(--bg-tertiary);
+  border-radius: 12px;
+}
+
+.step-icon {
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.step-content {
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.step-content strong {
+  color: var(--accent-primary);
+}
+
+.step-content kbd {
+  display: inline-block;
+  padding: 2px 6px;
+  font-size: 11px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  font-family: monospace;
+}
+
+.onboarding-done {
+  width: 100%;
+  padding: 14px;
+  font-size: 16px;
+}

@@ -177,6 +177,9 @@ export function initUI() {
 
     // Initial render
     render(getState(), getSaveStatus(), getCurrentView());
+
+    // Check if first run
+    checkFirstRun();
 }
 
 /**
@@ -1148,6 +1151,17 @@ function handleAction(e) {
         case 'export-debug':
             exportDebugBundle();
             break;
+        case 'ai-setup':
+            closeMenu();
+            window.location.href = './ai-setup.html';
+            break;
+        case 'onboarding':
+            closeMenu();
+            showOnboarding();
+            break;
+        case 'close-onboarding':
+            closeOnboarding();
+            break;
     }
 }
 
@@ -1728,4 +1742,36 @@ function clearTagFilter() {
     activeTagFilter = null;
     showToast('Filter cleared');
     render(getState(), getSaveStatus(), 'tasks');
+}
+
+/**
+ * Show onboarding modal
+ */
+function showOnboarding() {
+    const overlay = document.getElementById('onboardingOverlay');
+    if (overlay) {
+        overlay.hidden = false;
+    }
+}
+
+/**
+ * Close onboarding modal
+ */
+function closeOnboarding() {
+    const overlay = document.getElementById('onboardingOverlay');
+    if (overlay) {
+        overlay.hidden = true;
+    }
+    // Mark as seen
+    localStorage.setItem('commander-onboarded', 'true');
+}
+
+/**
+ * Check if first run and show onboarding
+ */
+function checkFirstRun() {
+    const seen = localStorage.getItem('commander-onboarded');
+    if (!seen) {
+        showOnboarding();
+    }
 }
