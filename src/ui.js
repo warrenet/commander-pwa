@@ -1139,59 +1139,6 @@ function handleConfirmShip() {
 }
 
 /**
- * Open template modal
- */
-function openTemplateModal() {
-    const overlay = document.getElementById('templateOverlay');
-    const listEl = document.getElementById('templateList');
-    if (!overlay || !listEl) return;
-
-    // Render template options
-    const templates = getTemplateList();
-    listEl.innerHTML = '';
-
-    templates.forEach(t => {
-        const btn = document.createElement('button');
-        btn.className = 'template-option';
-        btn.innerHTML = `
-      <span class="template-icon">${t.icon}</span>
-      <div class="template-info">
-        <div class="template-name">${t.name}</div>
-        <div class="template-desc">${t.description}</div>
-      </div>
-    `;
-        btn.addEventListener('click', () => {
-            selectTemplate(t.key);
-        });
-        listEl.appendChild(btn);
-    });
-
-    overlay.hidden = false;
-}
-
-/**
- * Close template modal
- */
-function closeTemplateModal() {
-    const overlay = document.getElementById('templateOverlay');
-    if (overlay) overlay.hidden = true;
-}
-
-/**
- * Select a template and fill the capture textarea
- * @param {string} templateKey
- */
-function selectTemplate(templateKey) {
-    const content = getFilledTemplate(templateKey, {});
-    const textarea = document.getElementById('captureTextarea');
-    if (textarea) {
-        textarea.value = content;
-        textarea.focus();
-    }
-    closeTemplateModal();
-}
-
-/**
  * Handle restore file selection
  * @param {Event} e
  */
