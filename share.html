@@ -216,6 +216,8 @@
 
         const auto = params.get('auto') === 'true';
         const sourceParam = params.get('source'); // 'ai' or undefined
+        const priorityParam = params.get('priority'); // 'high', 'medium', 'low'
+        const categoryParam = getParam('category'); // 'work', 'personal', etc.
 
         // Combine shared content
         let content = '';
@@ -275,9 +277,25 @@
                 if (tagsRaw) tagsRaw += ', ';
                 tagsRaw += '#ai-suggestion';
 
-                // AI suggestions go to Inbox, but we store them as logs first? 
-                // The current app logic: Logs can route to inbox via 'route' prop.
-                finalRoute = 'inbox'; // Direct to inbox via log route prop
+                // AI suggestions go to Inbox
+                finalRoute = 'inbox';
+            }
+
+            // Priority flag support
+            if (priorityParam === 'high') {
+                if (tagsRaw) tagsRaw += ', ';
+                tagsRaw += '#priority-high';
+            } else if (priorityParam === 'medium') {
+                if (tagsRaw) tagsRaw += ', ';
+                tagsRaw += '#priority-medium';
+            }
+
+            // Category routing support
+            if (categoryParam) {
+                if (tagsRaw) tagsRaw += ', ';
+                tagsRaw += `#${categoryParam}`;
+                // Override category if specified
+                finalCategory = categoryParam;
             }
 
             const tags = tagsRaw ? tagsRaw.split(',').map(t => t.trim()).filter(Boolean) : [];
@@ -339,8 +357,13 @@
                     putReq.onerror = () => reject(putReq.error);
                 });
 
-                // Show toast
+                // Show toast with custom icon for AI captures
                 const toast = document.getElementById('toast');
+                if (sourceParam === 'ai') {
+                    toast.textContent = '🤖 AI Suggestion Saved!';
+                } else {
+                    toast.textContent = 'Saved!';
+                }
                 toast.classList.add('show');
 
                 // Vibrate if available
