@@ -1292,6 +1292,32 @@ function handleAction(e) {
         case 'close-onboarding':
             closeOnboarding();
             break;
+
+        // Help category handlers
+        case 'help-tasks':
+            closeMenu();
+            showHelpModal('tasks');
+            break;
+        case 'help-capture':
+            closeMenu();
+            showHelpModal('capture');
+            break;
+        case 'help-productivity':
+            closeMenu();
+            showHelpModal('productivity');
+            break;
+        case 'help-ai':
+            closeMenu();
+            showHelpModal('ai');
+            break;
+        case 'help-automation':
+            closeMenu();
+            showHelpModal('automation');
+            break;
+        case 'random-tip':
+            closeMenu();
+            showRandomTip();
+            break;
     }
 }
 
@@ -1982,6 +2008,127 @@ function checkFirstRun() {
     if (!seen) {
         showOnboarding();
     }
+}
+
+/**
+ * Show a help modal for a specific category
+ * @param {string} category - 'tasks' | 'capture' | 'productivity' | 'ai' | 'automation'
+ */
+function showHelpModal(category) {
+    // Dynamic content based on category
+    const content = {
+        tasks: {
+            title: '📋 Task Management',
+            items: [
+                '📥 **Inbox**: Capture everything here first',
+                '📋 **Next**: Things you\'ll do this week',
+                '🚀 **Ship Today**: Your 3-5 focus items',
+                '💡 Swipe right on a task to move it forward',
+                '🔄 Long-press for more options'
+            ]
+        },
+        capture: {
+            title: '✏️ Capture',
+            items: [
+                '📋 Paste clipboard content with one tap',
+                '🎙️ Use voice capture for hands-free input',
+                '📝 Templates pre-fill common log formats',
+                '🔗 Share from any app to capture URLs',
+                '⏰ Use timestamps to track when things happened'
+            ]
+        },
+        productivity: {
+            title: '🎯 Productivity Tools',
+            items: [
+                '🔒 **Focus Mode**: Shows only Ship Today',
+                '🍅 **Pomodoro**: 25-min focus sessions',
+                '⌨️ **Keyboard**: Press ? for shortcuts',
+                '🔥 **Streak**: Clear inbox daily for streak',
+                '📊 **Board View**: See tasks by category'
+            ]
+        },
+        ai: {
+            title: '🤖 AI Integration',
+            items: [
+                '🎯 **Prioritize**: AI ranks your tasks',
+                '🔨 **Break Down**: Split big tasks into steps',
+                '📅 **Plan Day**: Get a time-blocked schedule',
+                '💡 All prompts copy to clipboard',
+                '✨ Paste into ChatGPT/Gemini for free AI!'
+            ]
+        },
+        automation: {
+            title: '🔗 Automation',
+            items: [
+                '📱 **MacroDroid**: Trigger actions via URLs',
+                '🔇 **Silent Mode**: Add tasks in background',
+                '🏷️ **Auto-tags**: URLs can include tags',
+                '⚡ **Commands**: add, log, toggle-theme',
+                '📄 Visit /automation.html for all links'
+            ]
+        }
+    };
+
+    const cat = content[category] || content.tasks;
+
+    showAlert(cat.title, cat.items.map(i => `• ${i}`).join('\n'));
+}
+
+/**
+ * Show a random tip as a toast
+ */
+function showRandomTip() {
+    const tips = [
+        '💡 Press ? anytime to see keyboard shortcuts',
+        '💡 Swipe right on a task to move it to the next section',
+        '💡 Long-press any task for more options',
+        '💡 Click on a #tag to filter by that tag',
+        '💡 Use Focus Mode to hide distractions',
+        '💡 The Quartermaster button changes based on time of day',
+        '💡 Export your data weekly for backup',
+        '💡 AI features work without API keys - just paste into ChatGPT!',
+        '💡 Morning is for planning, evening for reflection',
+        '💡 Keep Ship Today to 3-5 items max',
+        '💡 Use voice capture while driving (be safe!)',
+        '💡 Share from any app to quickly capture URLs',
+        '💡 Inbox Zero streaks motivate daily clearing',
+        '💡 Board View groups tasks by category automatically'
+    ];
+
+    const tip = tips[Math.floor(Math.random() * tips.length)];
+    showToast(tip, 'info');
+}
+
+/**
+ * Show an alert modal (reuses confirm modal styling)
+ * @param {string} title
+ * @param {string} message
+ */
+function showAlert(title, message) {
+    // Create a simple modal dynamically
+    const existing = document.getElementById('helpModal');
+    if (existing) existing.remove();
+
+    const modal = document.createElement('div');
+    modal.id = 'helpModal';
+    modal.className = 'modal-overlay';
+    modal.innerHTML = `
+        <div class="modal" style="max-width: 400px;">
+            <div class="modal-header">
+                <h2>${title}</h2>
+                <button class="modal-close" onclick="this.closest('.modal-overlay').remove()">×</button>
+            </div>
+            <div class="modal-body" style="white-space: pre-line; line-height: 1.8; font-size: 14px;">
+                ${message.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')}
+            </div>
+        </div>
+    `;
+
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) modal.remove();
+    });
+
+    document.body.appendChild(modal);
 }
 
 // Run first-run check
