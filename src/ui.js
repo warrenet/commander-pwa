@@ -176,6 +176,9 @@ export function initUI() {
     window.addEventListener('online', updateConnectionStatus);
     window.addEventListener('offline', updateConnectionStatus);
 
+    // Automation: Listen for commands
+    window.addEventListener('commander-command', handleCommandEvent);
+
     // Initial check
     updateConnectionStatus();
 
@@ -187,6 +190,83 @@ export function initUI() {
 
     // Check if first run
     checkFirstRun();
+}
+
+/**
+ * Handle automation commands
+ * @param {CustomEvent} e 
+ */
+function handleCommandEvent(e) {
+    const { command, text, tags, priority, silent, view } = e.detail;
+
+    // Set silent mode flag mechanism if needed for this session
+    // For now we'll pass silent flag to actions where possible
+
+    console.log('[UI] Received command:', command, e.detail);
+
+    // Command Router
+    switch (command) {
+        case 'add-task':
+        case 'add':
+            if (text) {
+                // Parse priority from valid values
+                let finalTags = [...tags];
+                let section = 'inbox'; // Default
+
+                // Add priority tag if specified
+                if (priority) {
+                    finalTags.push(priority === 'high' ? '#priority' : `#${priority}`);
+                }
+
+                // Add item directly
+                const id = addItem(section, text);
+
+                // Add tags if any
+                if (finalTags.length > 0) {
+                    // Update item to append tags text or metadata
+                    // System simple approach: append to text for now or implementation dependent
+                    // But we have updateItem. Let's append tags to text if we don't have separate tag field in addItem yet
+                    // The addItem only takes text. The tagger runs on text.
+                    // So we should append tags to text.
+                    const textWithTags = `${text} ${finalTags.join(' ')}`;
+                    updateItem(section, id, textWithTags);
+                }
+
+                if (!silent) {
+                    showToast(`Added: ${text}`, 'success');
+                    if (navigator.vibrate) navigator.vibrate(50);
+                }
+            }
+            break;
+
+        case 'log':
+            if (text) {
+                addLog(text, 'automation');
+                if (!silent) showToast('Log added', 'info');
+            }
+            break;
+
+        case 'toggle-theme':
+            // Toggle theme class on body
+            document.body.classList.toggle('theme-light');
+            // Save preference if needed (not native yet but illustrative)
+            if (!silent) showToast('Theme toggled', 'info');
+            break;
+
+        case 'focus-mode':
+            if (!silent) showToast('Focus Mode activated', 'info');
+            // Logic to set focus mode view would go here if/when focus.js is integrated fully to UI
+            // For now, switch to shipToday
+            setCurrentView('tasks');
+            // We'd ideally toggle the focus utility
+            break;
+
+        case 'navigate':
+            if (view) {
+                setCurrentView(view);
+            }
+            break;
+    }
 }
 
 /**

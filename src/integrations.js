@@ -17,16 +17,26 @@ export function getLaunchParams() {
     }
 
     const screen = params.get('screen');
+    const view = params.get('view'); // Direct view support
     const text = params.get('text');
     const template = params.get('template');
+    const command = params.get('command');
+    const tags = params.get('tags');
+    const priority = params.get('priority');
+    const silent = params.get('silent') === '1' || params.get('silent') === 'true';
     const autofocus = params.get('autofocus') === '1';
 
-    if (!screen && !text && !template) return null;
+    // If practically empty, return null
+    if (!screen && !view && !text && !template && !command) return null;
 
     return {
-        view: mapScreenToView(screen) || 'capture',
+        view: view || mapScreenToView(screen) || (text ? 'capture' : null),
         template: mapScreenToTemplate(screen) || template,
         text,
+        command,
+        tags: tags ? tags.split(',').map(t => t.trim()) : [],
+        priority,
+        silent,
         autofocus,
         originalParams: params
     };
@@ -75,27 +85,34 @@ export function applyLaunchParams(params, setViewCallback) {
 
     console.log('[Integrations] Applying launch params:', params);
 
-    // 1. Switch View
+    // 1. Dispatch Command Event (Core of v2.1 Automation)
+    if (params.command || params.tags.length > 0 || params.priority || params.silent || params.text) {
+        // Dispatch event for UI/Main to handle
+        const event = new CustomEvent('commander-command', {
+            detail: params
+        });
+        window.dispatchEvent(event);
+    }
+
+    // 2. Switch View (Ui Navigation)
     if (params.view) {
         setViewCallback(params.view);
     }
 
-    // 2. Handle Capture View specifics
+    // 3. Handle Capture View specifics (Legacy/Direct text handling)
     if (params.view === 'capture') {
         setTimeout(() => {
             const textarea = document.getElementById('captureTextarea');
             if (!textarea) return;
 
-            // Pre-fill text
-            if (params.text) {
+            // Pre-fill text if not handled by command
+            // (If 'command' is 'add-task', it might be handled automatically without UI,
+            // but if we are in capture view, we show it)
+            if (params.text && !params.command) {
                 textarea.value = params.text;
             }
             // Or Template
             else if (params.template) {
-                // Dynamically import templates if needed, or assume global/passed helper
-                // For now, we rely on the main.js logic or we emit an event
-                // But better to just handle it here if we have access to getFilledTemplate
-                // We will dispatch a custom event for the UI to handle, to decouple
                 const event = new CustomEvent('commander-fill-template', {
                     detail: { template: params.template }
                 });
@@ -103,9 +120,8 @@ export function applyLaunchParams(params, setViewCallback) {
             }
 
             // Autofocus
-            if (params.autofocus || params.text) {
+            if ((params.autofocus || params.text) && !params.silent) {
                 textarea.focus();
-                // Move cursor to end if text exists
                 if (textarea.value) {
                     textarea.selectionStart = textarea.selectionEnd = textarea.value.length;
                 }
@@ -115,6 +131,7 @@ export function applyLaunchParams(params, setViewCallback) {
 
     // Clean URL
     if (window.history.replaceState) {
-        window.history.replaceState({}, document.title, window.location.pathname);
+        const cleanedUrl = window.location.pathname + (params.safemode ? '?safemode=1' : '');
+        window.history.replaceState({}, document.title, cleanedUrl);
     }
 }

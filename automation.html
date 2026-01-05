@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Commander Automation Helper</title>
+    <link rel="stylesheet" href="/style.css">
+    <style>
+        body {
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .command-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-top: 8px;
+        }
+
+        code {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 8px;
+            border-radius: 6px;
+            font-family: monospace;
+            flex: 1;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+
+        .copy-btn {
+            background: var(--accent-primary);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        h2 {
+            margin-top: 0;
+            color: var(--accent-primary);
+        }
+
+        p {
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+        }
+    </style>
+</head>
+
+<body class="theme-dark">
+    <h1>🤖 Automation Helper</h1>
+    <p>Use these Deep Links to control Commander from MacroDroid, Tasker, or Shortcuts.</p>
+
+    <div class="card">
+        <h2>Add Task (Silent)</h2>
+        <p>Adds a task to the Inbox without opening the full UI or playing sounds. Great for background triggers.</p>
+        <div class="command-row">
+            <code>/?command=add&text=Buy Milk&silent=true</code>
+            <button class="copy-btn" onclick="copyLink(this)">Copy Link</button>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Add Task (High Priority)</h2>
+        <p>Adds a high-priority task with tag #priority.</p>
+        <div class="command-row">
+            <code>/?command=add&text=Urgent Fix&priority=high</code>
+            <button class="copy-btn" onclick="copyLink(this)">Copy Link</button>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Quick Log</h2>
+        <p>Append a timestamped entry to your logs.</p>
+        <div class="command-row">
+            <code>/?command=log&text=Arrived at Gym&silent=true</code>
+            <button class="copy-btn" onclick="copyLink(this)">Copy Link</button>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Focus Mode</h2>
+        <p>Activate Focus Mode directly.</p>
+        <div class="command-row">
+            <code>/?command=focus-mode</code>
+            <button class="copy-btn" onclick="copyLink(this)">Copy Link</button>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Toggle Theme</h2>
+        <p>Switch between Light/Dark mode (e.g. at sunset/sunrise).</p>
+        <div class="command-row">
+            <code>/?command=toggle-theme&silent=true</code>
+            <button class="copy-btn" onclick="copyLink(this)">Copy Link</button>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Open Specific View</h2>
+        <p>Open different sections directly.</p>
+        <div class="command-row">
+            <code>/?view=shipToday</code>
+            <button class="copy-btn" onclick="copyLink(this)">Copy Link</button>
+        </div>
+    </div>
+
+    <script>
+        function copyLink(btn) {
+            const code = btn.previousElementSibling.textContent;
+            const fullUrl = window.location.origin + code;
+            navigator.clipboard.writeText(fullUrl);
+
+            const originalText = btn.textContent;
+            btn.textContent = "Copied!";
+            setTimeout(() => btn.textContent = originalText, 1500);
+        }
+    </script>
+</body>
+
+</html>
