@@ -138,6 +138,20 @@
             font-size: 14px;
         }
 
+        .guide-ai-share {
+            margin-top: 12px;
+        }
+
+        .guide-desc {
+            color: #a0a0b0;
+            font-size: 13px;
+            margin-bottom: 8px;
+        }
+
+        .guide-ai-share .link-url {
+            margin-bottom: 0;
+        }
+
         .toast {
             position: fixed;
             bottom: 80px;
@@ -235,12 +249,12 @@
             </ol>
         </div>
 
-        <div class="guide" style="margin-top: 12px;">
+        <div class="guide guide-ai-share">
             <h3>🤖 AI Share Link</h3>
-            <p style="color: #a0a0b0; font-size: 13px; margin-bottom: 8px;">
+            <p class="guide-desc">
                 For ChatGPT/Gemini to send tasks directly:
             </p>
-            <div class="link-url" id="url-ai" style="margin-bottom: 0;">
+            <div class="link-url" id="url-ai">
                 https://warrenet.github.io/commander-pwa/share.html?text=YOUR_TASK&source=ai&auto=true
             </div>
         </div>
