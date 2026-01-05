@@ -1277,6 +1277,69 @@ function handleAction(e) {
         case 'export-debug':
             exportDebugBundle();
             break;
+
+        // Missing handlers - Productivity
+        case 'focus-mode':
+            closeMenu();
+            showToast('🔒 Focus Mode: Coming soon!', 'info');
+            break;
+        case 'pomodoro':
+            closeMenu();
+            startPomodoro();
+            break;
+        case 'keyboard-help':
+            closeMenu();
+            showKeyboardHelp();
+            break;
+        case 'refine':
+            closeContextMenu();
+            refineWithAI();
+            break;
+
+        // Missing handlers - AI
+        case 'ai-prioritize':
+            closeMenu();
+            copyAIPrompt('prioritize');
+            break;
+        case 'ai-breakdown':
+            closeMenu();
+            copyAIPrompt('breakdown');
+            break;
+        case 'ai-plan':
+            closeMenu();
+            copyAIPrompt('planDay');
+            break;
+        case 'daily-debrief':
+            closeMenu();
+            copyAIPrompt('dailyDebrief');
+            break;
+
+        // Missing handlers - Data
+        case 'export':
+            closeMenu();
+            downloadJSON(getState());
+            showToast('Data exported!', 'success');
+            break;
+        case 'import':
+            closeMenu();
+            importInputEl.click();
+            break;
+        case 'nuke-db':
+            showConfirm('💀 Nuke Database',
+                'This will DELETE ALL DATA permanently. Are you absolutely sure?',
+                async () => {
+                    try {
+                        indexedDB.deleteDatabase('commander-db');
+                        localStorage.clear();
+                        showToast('Database nuked. Reloading...', 'warning');
+                        setTimeout(() => location.reload(), 1500);
+                    } catch (e) {
+                        showToast('Failed to nuke database', 'error');
+                    }
+                }
+            );
+            break;
+
         case 'ai-setup':
             closeMenu();
             window.location.href = './ai-setup.html';
@@ -2129,6 +2192,178 @@ function showAlert(title, message) {
     });
 
     document.body.appendChild(modal);
+}
+
+/**
+ * Close context menu
+ */
+function closeContextMenu() {
+    if (contextMenuEl) contextMenuEl.hidden = true;
+    selectedItem = null;
+}
+
+/**
+ * Start a Pomodoro timer (25 minutes)
+ */
+function startPomodoro() {
+    const duration = 25 * 60; // 25 minutes in seconds
+    let remaining = duration;
+
+    showToast('🍅 Pomodoro started! 25 minutes of focus.', 'success');
+
+    const interval = setInterval(() => {
+        remaining--;
+
+        if (remaining <= 0) {
+            clearInterval(interval);
+            showToast('🍅 Pomodoro complete! Take a break.', 'success');
+            if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+
+            // Log the session
+            addLog('🍅 Pomodoro session completed (25 min)', 'pomodoro');
+        }
+    }, 1000);
+
+    // Store interval so it could be cancelled
+    window._pomodoroInterval = interval;
+}
+
+/**
+ * Show keyboard shortcuts help
+ */
+function showKeyboardHelp() {
+    const shortcuts = [
+        '**j / ↓** — Move selection down',
+        '**k / ↑** — Move selection up',
+        '**Enter** — Edit selected item',
+        '**d** — Delete selected item',
+        '**m** — Move to different section',
+        '**n** — New item',
+        '**1 / 2 / 3** — Jump to Inbox / Next / Ship Today',
+        '**b** — Toggle Board view',
+        '**Escape** — Clear selection / Close modal',
+        '**?** — Show this help'
+    ];
+
+    showAlert('⌨️ Keyboard Shortcuts', shortcuts.join('\n'));
+}
+
+/**
+ * Refine selected item with AI
+ */
+function refineWithAI() {
+    if (!selectedItem) {
+        showToast('Select an item first', 'warning');
+        return;
+    }
+
+    const item = selectedItem;
+    const prompt = `Help me refine this task to be more actionable and clear:
+
+"${item.text}"
+
+Please provide:
+1. A clearer, more specific version of this task
+2. Any missing context or details I should add
+3. If it's too vague, break it down into smaller steps`;
+
+    navigator.clipboard.writeText(prompt).then(() => {
+        showToast('Refine prompt copied! Paste into ChatGPT.', 'success');
+    }).catch(() => {
+        showToast('Failed to copy prompt', 'error');
+    });
+}
+
+/**
+ * Copy an AI prompt to clipboard
+ * @param {string} promptType - 'prioritize' | 'breakdown' | 'planDay' | 'dailyDebrief'
+ */
+function copyAIPrompt(promptType) {
+    const state = getState();
+
+    const prompts = {
+        prioritize: generatePrioritizePrompt(state),
+        breakdown: generateBreakdownPrompt(state),
+        planDay: generatePlanDayPrompt(state),
+        dailyDebrief: generateDebriefPrompt(state)
+    };
+
+    const prompt = prompts[promptType];
+    if (!prompt) {
+        showToast('Unknown prompt type', 'error');
+        return;
+    }
+
+    navigator.clipboard.writeText(prompt).then(() => {
+        showToast(`${promptType} prompt copied!`, 'success');
+    }).catch(() => {
+        showToast('Failed to copy prompt', 'error');
+    });
+}
+
+function generatePrioritizePrompt(state) {
+    const tasks = [
+        ...state.shipToday.map(t => `[Ship Today] ${t.text}`),
+        ...state.next.map(t => `[Next] ${t.text}`),
+        ...state.inbox.map(t => `[Inbox] ${t.text}`)
+    ];
+
+    return `Help me prioritize these tasks. Rank them by importance/urgency:
+
+${tasks.join('\n')}
+
+Please:
+1. Identify my TOP 3 priorities for today
+2. Explain WHY each should be prioritized
+3. Flag any tasks that are vague or too large`;
+}
+
+function generateBreakdownPrompt(state) {
+    const shipItems = state.shipToday.map(t => t.text).join('\n- ');
+    return `Break down my "Ship Today" tasks into smaller, actionable steps:
+
+- ${shipItems || 'No tasks in Ship Today'}
+
+For each task:
+1. List 3-5 concrete sub-steps
+2. Each step should take 30 min or less
+3. Order them logically`;
+}
+
+function generatePlanDayPrompt(state) {
+    const today = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+    const shipItems = state.shipToday.map(t => `- ${t.text}`).join('\n');
+
+    return `Create a time-blocked schedule for today (${today}).
+
+My priorities:
+${shipItems || '(No Ship Today items)'}
+
+Please:
+1. Create a schedule from 8 AM to 6 PM
+2. Include 15-min breaks every 90 minutes
+3. Put hard tasks in the morning
+4. Add buffer time for unexpected items`;
+}
+
+function generateDebriefPrompt(state) {
+    const shipped = (state.shipped || []).slice(0, 10);
+    const logs = (state.logs || []).slice(0, 5);
+
+    let content = '## What I Shipped Today\n';
+    shipped.forEach(s => content += `- ${s.text || s}\n`);
+
+    content += '\n## My Notes/Logs\n';
+    logs.forEach(l => content += `- ${l.content?.substring(0, 100) || 'Log entry'}\n`);
+
+    return `Review my day and provide feedback:
+
+${content}
+
+Please:
+1. Grade my day (A/B/C/D/F)
+2. Identify wins and lessons
+3. Suggest one improvement for tomorrow`;
 }
 
 // Run first-run check
