@@ -1629,3 +1629,285 @@ body.focus-mode::before {
   font-family: monospace;
   font-size: 16px;
 }
+
+/* ===========================================
+   VISUAL POLISH v2.0
+   Premium effects, micro-animations, refinements
+   =========================================== */
+
+/* Glassmorphism for modals */
+.modal {
+  background: rgba(18, 18, 26, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Enhanced shadows */
+.section,
+.item,
+.menu-content,
+.modal {
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.2),
+    0 2px 4px -1px rgba(0, 0, 0, 0.1);
+}
+
+/* Glow effects for primary actions */
+.btn-primary,
+.quartermaster-btn {
+  box-shadow:
+    0 0 20px rgba(0, 212, 255, 0.3),
+    0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.btn-primary:hover,
+.quartermaster-btn:hover {
+  box-shadow:
+    0 0 30px rgba(0, 212, 255, 0.5),
+    0 6px 16px rgba(0, 0, 0, 0.4);
+}
+
+/* Smooth micro-animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.7;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Apply animations */
+.section {
+  animation: slideInUp 0.3s ease-out;
+}
+
+.item {
+  animation: fadeIn 0.2s ease-out;
+}
+
+.modal-overlay:not([hidden]) .modal {
+  animation: slideInUp 0.3s ease-out;
+}
+
+.toast {
+  animation: slideInDown 0.3s ease-out;
+}
+
+/* Improved touch feedback */
+.item:active,
+.menu-btn:active,
+.btn:active {
+  transform: scale(0.98);
+  opacity: 0.9;
+}
+
+/* Gradient accents */
+.section-header {
+  background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-secondary) 100%);
+}
+
+.section-inbox .section-header {
+  border-left: 3px solid var(--accent-primary);
+}
+
+.section-next .section-header {
+  border-left: 3px solid var(--accent-secondary);
+}
+
+.section-ship .section-header {
+  border-left: 3px solid var(--accent-success);
+}
+
+/* Status indicator glow */
+.status-indicator.status-online::before {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: var(--accent-success);
+  animation: pulse 2s infinite;
+  z-index: -1;
+}
+
+/* Menu polish */
+.menu-content {
+  background: rgba(18, 18, 26, 0.98);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.menu-btn {
+  transition: all var(--transition-fast);
+  border-left: 3px solid transparent;
+}
+
+.menu-btn:hover {
+  background: var(--bg-tertiary);
+  border-left-color: var(--accent-primary);
+}
+
+.menu-category {
+  background: linear-gradient(90deg, var(--bg-tertiary), transparent);
+  border-radius: 4px;
+}
+
+/* Item hover states */
+.item {
+  transition: all var(--transition-fast);
+  border-left: 3px solid transparent;
+}
+
+.item:hover {
+  background: var(--bg-tertiary);
+  border-left-color: var(--accent-primary);
+}
+
+/* Tag styling */
+.tag {
+  background: linear-gradient(135deg, var(--accent-secondary), var(--accent-primary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 600;
+}
+
+/* Empty state polish */
+.empty-state {
+  background: linear-gradient(135deg, var(--bg-tertiary), var(--bg-secondary));
+  border-radius: 12px;
+  padding: var(--space-lg);
+  text-align: center;
+}
+
+.empty-state .empty-icon {
+  font-size: 32px;
+  animation: pulse 3s infinite;
+}
+
+/* Toast polish */
+.toast {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.toast-success {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.9), rgba(6, 95, 70, 0.9));
+}
+
+.toast-error {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.9), rgba(127, 29, 29, 0.9));
+}
+
+.toast-info {
+  background: linear-gradient(135deg, rgba(0, 212, 255, 0.9), rgba(124, 58, 237, 0.9));
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--accent-primary);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-secondary);
+}
+
+/* Selection styling */
+::selection {
+  background: var(--accent-primary);
+  color: var(--bg-primary);
+}
+
+/* Loading skeleton */
+.skeleton {
+  background: linear-gradient(90deg, var(--bg-tertiary) 0%, var(--bg-elevated) 50%, var(--bg-tertiary) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 4px;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  :root {
+    --border-color: #555;
+    --text-muted: #999;
+  }
+
+  .item,
+  .section,
+  .modal {
+    border: 2px solid var(--border-color);
+  }
+}
