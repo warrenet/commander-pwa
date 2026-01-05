@@ -36,6 +36,65 @@ let logsCountEl;
 
 // New DOM elements for template and capture
 const menuCloseBtnEl = document.querySelector('[data-action="close-menu"]');
+const quartermasterBtnEl = document.getElementById('quartermasterBtn');
+
+// ... (existing constants)
+
+/**
+ * QUARTERMASTER LOGIC (Context Intelligence)
+ */
+function updateQuartermaster() {
+    if (!quartermasterBtnEl) return;
+
+    const hour = new Date().getHours();
+    let label = '';
+    let icon = '';
+    let action = '';
+
+    // Logic: Morning (5-10), Day (10-18), Night (18-5)
+    if (hour >= 5 && hour < 10) {
+        label = 'Plan Day';
+        icon = '☀️';
+        action = 'MissionControl';
+    } else if (hour >= 18 || hour < 5) {
+        label = 'Debrief';
+        icon = '🌙';
+        action = 'NightlyDelta';
+    } else {
+        label = 'Quick Capture';
+        icon = '⚡';
+        action = 'capture';
+    }
+
+    quartermasterBtnEl.querySelector('.label').textContent = label;
+    quartermasterBtnEl.querySelector('.icon').textContent = icon;
+    quartermasterBtnEl.dataset.action = action;
+    quartermasterBtnEl.hidden = false;
+}
+
+// Initial update
+updateQuartermaster();
+
+// Update on visibility change
+document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+        updateQuartermaster();
+    }
+});
+
+quartermasterBtnEl?.addEventListener('click', () => {
+    const action = quartermasterBtnEl.dataset.action;
+
+    // Haptic
+    if (navigator.vibrate) navigator.vibrate(50);
+
+    if (action === 'capture') {
+        setCurrentView('capture');
+        captureTextareaEl.focus();
+    } else {
+        selectTemplate(action);
+    }
+});
 
 // Template elements
 const templateBtnEl = document.getElementById('templateBtn');

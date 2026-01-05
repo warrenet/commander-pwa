@@ -177,6 +177,11 @@ export function getFilledTemplate(id, options = {}) {
         content = content.replace('{{PREVIOUS_FOCUS}}', '1. \n2. \n3. ');
     }
 
+    // Replace Quartermaster context (Nightly)
+    if (options.shippedContext) {
+        content = content.replace(/- \n/, options.shippedContext + '\n'); // Replace empty bullet
+    }
+
     return content;
 }
 
