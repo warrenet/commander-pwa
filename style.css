@@ -1504,4 +1504,128 @@ body {
     opacity: 1;
   }
 }
+
 /* Keyboard Navigation (BONUS-01) */
+
+.keyboard-selected {
+  outline: 2px solid var(--accent-primary) !important;
+  outline-offset: 2px;
+  background: var(--bg-elevated) !important;
+}
+
+.keyboard-help-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.keyboard-help-content {
+  background: var(--bg-secondary);
+  border-radius: 16px;
+  padding: var(--space-lg);
+  max-width: 400px;
+  width: 90%;
+}
+
+.keyboard-help-content h3 {
+  margin: 0 0 var(--space-md) 0;
+  text-align: center;
+}
+
+.keyboard-help-content table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.keyboard-help-content td {
+  padding: var(--space-sm);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.keyboard-help-content kbd {
+  background: var(--bg-tertiary);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-family: monospace;
+  border: 1px solid var(--border-color);
+}
+
+.keyboard-help-content .close-help {
+  margin-top: var(--space-md);
+  width: 100%;
+  padding: var(--space-sm);
+  background: var(--accent-primary);
+  border: none;
+  border-radius: 8px;
+  color: var(--bg-primary);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Menu Categories */
+.menu-category {
+  padding: var(--space-sm) var(--space-md);
+  margin-top: var(--space-sm);
+}
+
+.menu-category-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Focus Mode */
+body.focus-mode .section-inbox,
+body.focus-mode .section-next,
+body.focus-mode .filter-bar,
+body.focus-mode .quartermaster-btn {
+  display: none !important;
+}
+
+body.focus-mode .section-ship {
+  min-height: 80vh;
+}
+
+body.focus-mode::before {
+  content: '🔒 Focus Mode';
+  position: fixed;
+  top: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--accent-warning);
+  color: var(--bg-primary);
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  z-index: 100;
+}
+
+/* Pomodoro Timer Indicator */
+.pomodoro-indicator {
+  position: fixed;
+  top: 60px;
+  right: var(--space-md);
+  background: linear-gradient(135deg, #ef4444, #7c3aed);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.pomodoro-indicator .time {
+  font-family: monospace;
+  font-size: 16px;
+}
