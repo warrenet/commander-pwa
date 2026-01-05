@@ -1,6 +1,6 @@
 {
   "name": "commander-pwa",
-  "version": "1.5.0",
+  "version": "1.7.0",
   "description": "Titan Prompt Commander - Offline-first execution surface",
   "type": "module",
   "scripts": {

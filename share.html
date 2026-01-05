@@ -244,8 +244,46 @@
             return Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
         }
 
-        // Auto-save logic for Automation/MacroDroid
-        if (auto && content && content !== '(No content shared)') {
+        // === BULK INGESTION (Track 7: Architecture Refactor) ===
+        const batchParam = params.get('batch');
+        if (batchParam) {
+            try {
+                const tasks = JSON.parse(decodeURIComponent(batchParam));
+                if (Array.isArray(tasks) && tasks.length > 0) {
+                    const savingStatus = document.createElement('div');
+                    savingStatus.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-size:24px;font-weight:bold;color:#00d4ff;background:#000;padding:20px;border-radius:12px;z-index:9999;border:2px solid #00d4ff;';
+                    savingStatus.textContent = `🤖 Bulk Importing ${tasks.length} items...`;
+                    document.body.appendChild(savingStatus);
+
+                    // Save all tasks to inbox
+                    const promises = tasks.map(text => {
+                        const entry = {
+                            id: generateId(),
+                            text: typeof text === 'string' ? text : text.text || String(text),
+                            createdAt: Date.now(),
+                            tags: ['#ai-batch']
+                        };
+                        return itemsStore.add(entry);
+                    });
+
+                    Promise.all(promises).then(() => {
+                        savingStatus.textContent = `✅ ${tasks.length} items added to Inbox!`;
+                        setTimeout(() => {
+                            window.location.href = './index.html';
+                        }, 1000);
+                    }).catch(err => {
+                        console.error('Bulk ingestion error:', err);
+                        savingStatus.textContent = '❌ Bulk import failed';
+                    });
+                    // Exit early - page will redirect, no further processing needed
+                }
+            } catch (e) {
+                console.error('Failed to parse batch param:', e);
+            }
+        }
+
+        // Auto-save logic for Automation/MacroDroid (only if not batch)
+        if (!batchParam && auto && content && content !== '(No content shared)') {
             // Wait for DOM and DB
             const savingStatus = document.createElement('div');
             savingStatus.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-size:24px;font-weight:bold;color:#00d4ff;background:#000;padding:20px;border-radius:12px;z-index:9999;border:2px solid #00d4ff;';

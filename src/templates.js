@@ -137,6 +137,28 @@ Learning:
 
 ### LOG
 #nightly #reflection`
+    },
+    {
+        id: 'WeeklyReview',
+        icon: '🗓️',
+        label: 'Weekly Review',
+        content: `## 🗓️ WEEKLY REVIEW — {{DATE}}
+
+### HUD
+- Week Score: /10
+- Big Wins: 
+
+### BODY
+Shipped this Week:
+{{WEEKLY_LOGS}}
+
+### REFLECTION
+- What went well?
+- What broke?
+- Theme for Next Week: 
+
+### LOG
+#weekly #review`
     }
 ];
 
@@ -180,6 +202,13 @@ export function getFilledTemplate(id, options = {}) {
     // Replace Quartermaster context (Nightly)
     if (options.shippedContext) {
         content = content.replace(/- \n/, options.shippedContext + '\n'); // Replace empty bullet
+    }
+
+    // Replace Weekly Review context
+    if (options.weeklyLogs) {
+        content = content.replace('{{WEEKLY_LOGS}}', options.weeklyLogs);
+    } else {
+        content = content.replace('{{WEEKLY_LOGS}}', '-');
     }
 
     return content;
