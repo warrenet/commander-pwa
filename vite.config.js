@@ -60,7 +60,30 @@ export default defineConfig({
             text: 'text',
             url: 'url'
           }
-        }
+        },
+        shortcuts: [
+          {
+            name: 'New Task',
+            short_name: 'New',
+            description: 'Add a new task to Inbox',
+            url: './?focus=new&autofocus=1',
+            icons: [{ src: 'icons/icon-192.png', sizes: '192x192' }]
+          },
+          {
+            name: 'Ship Mode',
+            short_name: 'Ship',
+            description: 'View Ship Today tasks',
+            url: './?view=shipToday',
+            icons: [{ src: 'icons/icon-192.png', sizes: '192x192' }]
+          },
+          {
+            name: 'Quick Capture',
+            short_name: 'Capture',
+            description: 'Open capture view',
+            url: './?view=capture&autofocus=1',
+            icons: [{ src: 'icons/icon-192.png', sizes: '192x192' }]
+          }
+        ]
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
