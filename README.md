@@ -2,7 +2,7 @@
 
 **Commander** is a sovereign, offline-first execution cockpit designed for high-reliability daily operations. It's a "no-fail" surface for capturing thoughts, managing priorities, and ensuring you ship every day.
 
-**Current Version:** v2.0.0 (The "Neural" Update)
+**Current Version:** v2.2.0 (The "Omega" Update)
 
 ---
 
@@ -25,11 +25,11 @@ Commander is your **personal mission control** for getting things done. It follo
 2. Tap **"Install App"** (or "Add to Home Screen")
 3. Launch from your home screen—it works like a native app
 
-### First 5 Minutes
-1. **Add 3 tasks** to your Inbox using the Capture tab
-2. **Move 1 task** to Ship Today (swipe right or use context menu)
-3. **Complete it** and mark as shipped
-4. **Check the Menu** to explore features
+### new! App Icon Shortcuts (Android)
+Long-press the app icon on your home screen for instant access:
+- **New Task**: Open capture modal immediately
+- **Ship Mode**: Jump straight to your daily priorities
+- **Quick Capture**: Auto-focused text entry
 
 ---
 
@@ -45,7 +45,7 @@ Commander is your **personal mission control** for getting things done. It follo
 
 ```
 ☀️ MORNING (7-9 AM)
-├── Open Commander
+├── Open Commander (or "Ship Mode" shortcut)
 ├── Review Ship Today (is it realistic?)
 ├── Move items from Next → Ship Today
 ├── Use Mission Control template for planning
@@ -71,6 +71,7 @@ Commander is your **personal mission control** for getting things done. It follo
 ### 📱 Core Features
 | Feature | Description |
 |---------|-------------|
+| **Matrix View** | Toggle "Next" list into a 2x2 Eisenhower Matrix grid |
 | **Voice Capture** | Click mic, speak, auto-transcribes |
 | **Template System** | Mission Control, Nightly Delta, Weekly Review |
 | **Smart Board** | Kanban view organizing by task type |
@@ -83,6 +84,7 @@ Commander is your **personal mission control** for getting things done. It follo
 |---------|-------------|---------------|
 | **Focus Mode** | Hides everything except Ship Today | Menu → 🔒 Focus Mode |
 | **Pomodoro Timer** | 25-minute focus sessions with logging | Menu → 🍅 Pomodoro |
+| **Status Brief** | Copy formatted report for Slack/Teams | Menu → 📋 Copy Status Brief |
 | **Keyboard Shortcuts** | Vim-style navigation | Press `?` anytime |
 | **Inbox Zero Streak** | Gamifies daily inbox clearing | Automatic |
 
@@ -103,9 +105,9 @@ Commander is your **personal mission control** for getting things done. It follo
 ### 🔗 Automation (MacroDroid)
 | Trigger | Action |
 |---------|--------|
-| 7 AM | Open Commander for morning planning |
-| 9 PM | Open Nightly Delta template |
-| Arrive at office | Show Ship Today |
+| **Recurring Tasks** | Tasks tagged `#daily` auto-reset at midnight |
+| **Auto-Cleanup** | `?command=log` appends to log without opening UI |
+| **Shortcuts** | Long-press app icon for quick actions |
 | "OK Google, task" | Deep link to add task |
 
 ---
@@ -163,6 +165,7 @@ Tips appear as toasts at appropriate moments:
 
 ### Export Your Data
 - **Menu → Export Data**: Full JSON backup
+- **Menu → Copy Status Brief**: Formatted text for teammates
 - **Menu → Weekly Export**: Last 7 days for AI review
 
 ### Safe Mode
@@ -177,7 +180,7 @@ If something breaks:
 - Schema version
 - IndexedDB status
 - Cache status
-- Device info
+- Storage Quota usage
 
 ---
 
@@ -187,6 +190,7 @@ If something breaks:
 - **Offline-First**: IndexedDB + Workbox Service Worker
 - **Zero-Latency**: Instant interactions, no spinners
 - **Data Sovereignty**: All data on your device
+- **Defensive Coding**: Deep validation and error boundaries
 - **No APIs**: Works without internet
 - **PWA**: Installable on any device
 
@@ -194,13 +198,14 @@ If something breaks:
 ```
 src/
 ├── main.js         # App entry point
-├── state.js        # State management (appState)
-├── ui.js           # UI rendering
+├── state.js        # State management (appState & recurring logic)
+├── ui.js           # UI rendering & matrix view
 ├── db.js           # IndexedDB operations
 ├── components/
 │   ├── Board.js    # Kanban board component
 │   └── List.js     # List view component
 └── utils/
+    ├── recurring.js# Recurring tasks & status generation
     ├── tagger.js   # Auto-tagging
     ├── haptics.js  # Vibration feedback
     ├── keyboard.js # Keyboard shortcuts
@@ -216,9 +221,9 @@ src/
 ```
 
 ### Build Stats
-- **Bundle Size**: ~48KB JS (gzipped: 15.6KB)
-- **CSS Size**: ~27KB (gzipped: 5.3KB)
-- **Precache**: ~535KB for full offline support
+- **Bundle Size**: ~57KB JS (gzipped: 19KB)
+- **CSS Size**: ~31KB (gzipped: 6KB)
+- **Precache**: ~553KB for full offline support
 
 ---
 
@@ -237,7 +242,7 @@ src/
 ### Tips for Success
 - ✅ Keep Ship Today to MAX 5 items
 - ✅ Process Inbox daily (streak motivation!)
-- ✅ Use Focus Mode for deep work
+- ✅ Use Matrix View for tough prioritization choices
 - ✅ Use AI prompts when overwhelmed
 - ❌ Don't organize in Inbox—just dump
 - ❌ Don't overload Ship Today
@@ -264,6 +269,13 @@ src/
 ---
 
 ## 📜 Version History
+
+### v2.2.0 - "Omega" Update
+- 📱 **App Icon Shortcuts**: Quick actions from home screen
+- 🎯 **Eisenhower Matrix**: 2x2 grid view for prioritization
+- 🔄 **Recurring Tasks**: Auto-reset for #daily items
+- 📋 **Status Briefs**: One-tap reports for teams
+- 🛡️ **Wellness Audit**: Defensive coding & memory safety
 
 ### v2.0.0 - "Neural" Update
 - ✨ 14 new utility modules
