@@ -40,7 +40,69 @@ let saveStatus = 'idle';
  */
 let currentView = 'tasks'; // 'tasks' or 'capture'
 
+/**
+ * UI-specific state (not persisted to DB)
+ * @type {{ filter: string | null, selectedId: string | null, searchQuery: string }}
+ */
+let uiState = {
+    filter: null,        // Active tag filter
+    selectedId: null,    // Currently selected item ID
+    searchQuery: ''      // Current search query
+};
+
 const DEBOUNCE_MS = 300;
+
+/**
+ * appState - Unified state access object (CORE-01)
+ * Provides centralized get/set API for all state
+ */
+export const appState = {
+    /**
+     * Get entire state snapshot
+     * @returns {{ tasks: Document, view: string, filter: string | null, saveStatus: string }}
+     */
+    get() {
+        return {
+            tasks: state,
+            view: currentView,
+            filter: uiState.filter,
+            selectedId: uiState.selectedId,
+            searchQuery: uiState.searchQuery,
+            saveStatus: saveStatus
+        };
+    },
+
+    /**
+     * Set state properties (triggers listeners)
+     * @param {Partial<{ view: string, filter: string | null, selectedId: string | null, searchQuery: string }>} updates
+     */
+    set(updates) {
+        if (updates.view !== undefined) {
+            currentView = updates.view;
+        }
+        if (updates.filter !== undefined) {
+            uiState.filter = updates.filter;
+        }
+        if (updates.selectedId !== undefined) {
+            uiState.selectedId = updates.selectedId;
+        }
+        if (updates.searchQuery !== undefined) {
+            uiState.searchQuery = updates.searchQuery;
+        }
+        notifyListeners();
+    },
+
+    /**
+     * Subscribe to state changes
+     * @param {Function} listener
+     * @returns {Function} Unsubscribe function
+     */
+    subscribe(listener) {
+        listeners.add(listener);
+        return () => listeners.delete(listener);
+    }
+};
+
 
 /**
  * Generate a unique ID for items
