@@ -5,6 +5,7 @@
  */
 
 import { saveDocument, loadDocument, savePendingWrite, createDefaultDocument } from './db.js';
+import { suggestTags } from './utils/tagger.js';
 
 /** @typedef {{ id: string, text: string }} Item */
 /** @typedef {{ id: string, createdAt: string, source: 'manual'|'clipboard', route: string, tags: string[], content: string }} LogEntry */
@@ -236,14 +237,21 @@ export async function initState() {
  * Add an item to a section
  * @param {'inbox' | 'next' | 'shipToday'} section
  * @param {string} text
+ * @param {string[]} [existingTags] - Optional existing tags to preserve
  * @returns {string} The new item's ID
  */
-export function addItem(section, text = '') {
+export function addItem(section, text = '', existingTags = []) {
     storeUndo();
+
+    // Auto-suggest tags based on text content (MOONSHOT-01)
+    const suggestedTags = suggestTags(text);
+    const allTags = [...new Set([...existingTags, ...suggestedTags])];
 
     const item = {
         id: generateId(),
         text: text,
+        tags: allTags.length > 0 ? allTags : undefined,
+        createdAt: Date.now()
     };
 
     state[section] = [...state[section], item];
