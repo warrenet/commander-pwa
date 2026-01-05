@@ -1911,3 +1911,74 @@ body.focus-mode::before {
     border: 2px solid var(--border-color);
   }
 }
+
+/* ===========================================
+   TIP TOASTS
+   Smart tips appearing as non-intrusive toasts
+   =========================================== */
+
+.toast-container {
+  position: fixed;
+  top: calc(var(--status-bar-height) + var(--space-md));
+  right: var(--space-md);
+  left: var(--space-md);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  pointer-events: none;
+}
+
+.toast {
+  padding: var(--space-md);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  pointer-events: auto;
+  cursor: pointer;
+  animation: slideInDown 0.3s ease-out;
+}
+
+.toast-tip {
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.95), rgba(0, 212, 255, 0.95));
+  color: white;
+  font-weight: 500;
+  box-shadow:
+    0 4px 20px rgba(124, 58, 237, 0.4),
+    0 2px 8px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.toast-tip .toast-icon {
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.toast-tip .toast-message {
+  flex: 1;
+  font-size: var(--font-size-sm);
+  line-height: 1.4;
+}
+
+.toast-exit {
+  animation: slideOutUp 0.3s ease-out forwards;
+}
+
+@keyframes slideOutUp {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+}
+
+/* Tap to dismiss */
+.toast:active {
+  transform: scale(0.98);
+  opacity: 0.9;
+}

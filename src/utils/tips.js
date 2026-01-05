@@ -209,6 +209,111 @@ export function getTipCount() {
     return getAllTips().length;
 }
 
+// Track shown tips to avoid repetition
+let shownTips = new Set();
+let lastTipTime = 0;
+const TIP_COOLDOWN = 60000; // 1 minute between tips
+
+/**
+ * Check if we should show a tip (respects cooldown)
+ * @returns {boolean}
+ */
+export function shouldShowTip() {
+    return Date.now() - lastTipTime > TIP_COOLDOWN;
+}
+
+/**
+ * Show a tip as a toast notification
+ * @param {string} [tip] - Specific tip to show, or random if not provided
+ * @param {string} [category] - Category to pick from if no tip provided
+ */
+export function showTipToast(tip, category) {
+    if (!shouldShowTip()) return;
+
+    const tipText = tip || getRandomTip(category || 'productivity');
+
+    // Avoid repeating tips
+    if (shownTips.has(tipText)) {
+        // Try to get a different tip
+        const allTips = category ? TIPS[category] : getAllTips();
+        const unshownTips = allTips.filter(t => !shownTips.has(t));
+        if (unshownTips.length > 0) {
+            showTipToast(unshownTips[Math.floor(Math.random() * unshownTips.length)]);
+            return;
+        }
+        // Reset if all tips shown
+        shownTips.clear();
+    }
+
+    shownTips.add(tipText);
+    lastTipTime = Date.now();
+
+    // Create toast element
+    const toast = document.createElement('div');
+    toast.className = 'toast toast-tip';
+    toast.innerHTML = `
+        <span class="toast-icon">💡</span>
+        <span class="toast-message">${tipText}</span>
+    `;
+
+    // Add to DOM
+    let container = document.querySelector('.toast-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.className = 'toast-container';
+        document.body.appendChild(container);
+    }
+    container.appendChild(toast);
+
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+        toast.classList.add('toast-exit');
+        setTimeout(() => toast.remove(), 300);
+    }, 5000);
+}
+
+/**
+ * Show a smart tip based on current state
+ * @param {Object} state - App state
+ */
+export function showSmartTipToast(state) {
+    if (!shouldShowTip()) return;
+    const tip = getSmartTip(state);
+    showTipToast(tip);
+}
+
+/**
+ * Show an action-based tip
+ * @param {'ship' | 'capture' | 'delete' | 'move'} action
+ */
+export function showActionTipToast(action) {
+    // 30% chance to show tip after action (not too annoying)
+    if (Math.random() > 0.3) return;
+    if (!shouldShowTip()) return;
+
+    const tip = getActionTip(action);
+    showTipToast(tip);
+}
+
+/**
+ * Show startup tip
+ * @param {Object} state - App state
+ */
+export function showStartupTip(state) {
+    // Delay startup tip by 2 seconds
+    setTimeout(() => {
+        showSmartTipToast(state);
+    }, 2000);
+}
+
+/**
+ * Reset tip tracking (for testing)
+ */
+export function resetTipTracking() {
+    shownTips.clear();
+    lastTipTime = 0;
+}
+
 export default {
     TIPS,
     getTimeTips,
@@ -216,5 +321,11 @@ export default {
     getSmartTip,
     getActionTip,
     getAllTips,
-    getTipCount
+    getTipCount,
+    shouldShowTip,
+    showTipToast,
+    showSmartTipToast,
+    showActionTipToast,
+    showStartupTip,
+    resetTipTracking
 };
