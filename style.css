@@ -2191,3 +2191,79 @@ textarea::selection {
     color: black;
   }
 }
+
+/* =============================================
+   Eisenhower Matrix View
+   =========================================== */
+
+.matrix-view-enabled .section-next .section-list {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto auto;
+  gap: 12px;
+  padding: 12px;
+}
+
+.matrix-view-enabled .section-next::before {
+  content: '';
+  display: block;
+  padding: 8px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-muted);
+  background: var(--bg-elevated);
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+
+.matrix-view-enabled .section-next .section-header::after {
+  content: ' (Matrix View)';
+  font-size: 12px;
+  color: var(--accent-primary);
+}
+
+.matrix-view-enabled .section-next .item {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 12px;
+  min-height: 80px;
+}
+
+/* Quadrant colors - high urgency tasks */
+.matrix-view-enabled .section-next .item:nth-child(4n+1) {
+  border-left: 3px solid #ef4444;
+  /* Urgent + Important */
+}
+
+.matrix-view-enabled .section-next .item:nth-child(4n+2) {
+  border-left: 3px solid #f59e0b;
+  /* Important, not urgent */
+}
+
+.matrix-view-enabled .section-next .item:nth-child(4n+3) {
+  border-left: 3px solid #3b82f6;
+  /* Urgent, not important */
+}
+
+.matrix-view-enabled .section-next .item:nth-child(4n+4) {
+  border-left: 3px solid #6b7280;
+  /* Neither */
+}
+
+/* Matrix labels on larger screens */
+@media (min-width: 600px) {
+  .matrix-view-enabled .section-next .section-list::before {
+    content: '🔴 Urgent + Important';
+    grid-column: 1;
+    font-size: 11px;
+    color: #ef4444;
+  }
+
+  .matrix-view-enabled .section-next .section-list::after {
+    content: '🟡 Important';
+    grid-column: 2;
+    font-size: 11px;
+    color: #f59e0b;
+  }
+}

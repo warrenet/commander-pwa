@@ -1291,6 +1291,14 @@ function handleAction(e) {
             closeMenu();
             showKeyboardHelp();
             break;
+        case 'copy-brief':
+            closeMenu();
+            copyStatusBrief();
+            break;
+        case 'matrix-view':
+            closeMenu();
+            toggleMatrixView();
+            break;
         case 'refine':
             closeContextMenu();
             refineWithAI();
@@ -2365,6 +2373,139 @@ Please:
 2. Identify wins and lessons
 3. Suggest one improvement for tomorrow`;
 }
+
+// Matrix view state
+let isMatrixView = false;
+
+/**
+ * Copy status brief to clipboard for Slack/Teams
+ */
+async function copyStatusBrief() {
+    try {
+        const state = getState();
+        const today = new Date().toLocaleDateString('en-US', {
+            weekday: 'short', month: 'short', day: 'numeric'
+        });
+
+        const shipped = (state.shipped || []).slice(0, 10).map(t => t.text || t).filter(Boolean);
+        const shipToday = (state.shipToday || []).map(t => t.text).filter(Boolean);
+        const next = (state.next || []).slice(0, 3).map(t => t.text).filter(Boolean);
+
+        let report = `📅 *Status Report - ${today}*\n\n`;
+
+        if (shipped.length > 0) {
+            report += `✅ *Shipped:*\n`;
+            shipped.forEach(t => report += `  • ${t}\n`);
+            report += '\n';
+        }
+
+        if (shipToday.length > 0) {
+            report += `🚀 *In Progress:*\n`;
+            shipToday.forEach(t => report += `  • ${t}\n`);
+            report += '\n';
+        }
+
+        if (next.length > 0) {
+            report += `⏭️ *Up Next:*\n`;
+            next.forEach(t => report += `  • ${t}\n`);
+        }
+
+        if (shipped.length === 0 && shipToday.length === 0) {
+            report += `(No tasks logged yet today)`;
+        }
+
+        await navigator.clipboard.writeText(report.trim());
+        showToast('📋 Status brief copied!', 'success');
+    } catch (e) {
+        console.error('[UI] Failed to copy status brief:', e);
+        showToast('Failed to copy', 'error');
+    }
+}
+
+/**
+ * Toggle Eisenhower Matrix view for Next section
+ */
+function toggleMatrixView() {
+    isMatrixView = !isMatrixView;
+
+    if (isMatrixView) {
+        showToast('🎯 Matrix View enabled', 'info');
+        document.body.classList.add('matrix-view-enabled');
+    } else {
+        showToast('📋 List View enabled', 'info');
+        document.body.classList.remove('matrix-view-enabled');
+    }
+
+    // Re-render
+    render(getState(), getSaveStatus(), getCurrentView());
+}
+
+/**
+ * Cross-tab sync listener
+ * When storage changes in another tab, refresh state
+ */
+function initCrossTabSync() {
+    window.addEventListener('storage', (e) => {
+        if (e.key === 'commander-sync' || e.key?.startsWith('commander-')) {
+            console.log('[UI] Cross-tab sync detected, refreshing...');
+            // Small delay to allow DB to update
+            setTimeout(() => {
+                render(getState(), getSaveStatus(), getCurrentView());
+            }, 100);
+        }
+    });
+}
+
+/**
+ * Check storage quota on startup
+ */
+async function checkStorageOnStartup() {
+    try {
+        let used = 0;
+        for (const key in localStorage) {
+            if (localStorage.hasOwnProperty(key)) {
+                used += localStorage[key].length * 2; // UTF-16
+            }
+        }
+
+        const MB = 1024 * 1024;
+        if (used > 4 * MB) {
+            showToast('⚠️ Storage almost full! Export a backup.', 'warning');
+        }
+    } catch (e) {
+        console.warn('[UI] Storage check failed:', e);
+    }
+}
+
+/**
+ * Reset #daily tasks if date changed
+ */
+function checkDailyTaskReset() {
+    try {
+        const lastReset = localStorage.getItem('commander-last-daily-reset');
+        const today = new Date().toISOString().split('T')[0];
+
+        if (lastReset !== today) {
+            console.log('[UI] Checking for #daily tasks to reset...');
+            // Mark as done immediately to prevent duplicate runs
+            localStorage.setItem('commander-last-daily-reset', today);
+
+            // Note: Actual reset would modify state - for now just log
+            // Full implementation would iterate through shipped items with #daily tag
+        }
+    } catch (e) {
+        console.warn('[UI] Daily reset check failed:', e);
+    }
+}
+
+// Initialize cross-tab sync
+initCrossTabSync();
+
+// Check storage on startup
+checkStorageOnStartup();
+
+// Check daily task reset
+checkDailyTaskReset();
 
 // Run first-run check
 checkFirstRun();
