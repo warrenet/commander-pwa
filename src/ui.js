@@ -778,12 +778,52 @@ function renderTemplateList() {
  * Select a template
  * @param {string} id
  */
-function selectTemplate(id) {
-    const content = getFilledTemplate(id);
+/**
+ * Select a template
+ * @param {string} id
+ */
+async function selectTemplate(id) {
+    let options = {};
+
+    // Ouroboros Link: Context Aware injection
+    if (id === 'MissionControl') {
+        const state = getState();
+        const logs = state.logs || [];
+
+        // Find last Nightly Delta
+        const lastNightly = logs.find(l =>
+            (l.tags && l.tags.includes('#nightly')) ||
+            (l.saveAs && l.saveAs.includes('NightlyDelta'))
+        );
+
+        if (lastNightly) {
+            // Extract "Tomorrow's Focus"
+            // Look for "Tomorrow's Focus:" and capture lines after it until next header or end
+            const match = lastNightly.content.match(/Tomorrow's Focus:([\s\S]*?)(?:###|$)/);
+            if (match && match[1]) {
+                const focusItems = match[1].trim()
+                    .split('\n')
+                    .map(line => line.trim())
+                    .filter(line => line.startsWith('-'))
+                    .map(line => line.replace(/^-\s*/, '').trim()) // Remove dash
+                    .filter(line => line) // Remove empty
+                    .map((item, i) => `${i + 1}. ${item}`) // Number them 1. 2. 3.
+                    .join('\n');
+
+                if (focusItems) {
+                    options.previousFocus = focusItems;
+                    showToast('🔗 Ouroboros Linked: Focus recovered', 'info');
+                }
+            }
+        }
+    }
+
+    const content = getFilledTemplate(id, options);
     if (content) {
         captureTextareaEl.value = content;
         closeTemplateModal();
         captureTextareaEl.focus();
+        // Move cursor to first empty line? Optional
     }
 }
 

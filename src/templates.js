@@ -52,9 +52,7 @@ Action Items:
 
 ### BODY
 Top 3 Priorities:
-1. 
-2. 
-3. 
+{{PREVIOUS_FOCUS}}
 
 ### CLOSE BLOCK
 - Review at: 
@@ -170,6 +168,14 @@ export function getFilledTemplate(id, options = {}) {
     content = content.replace(/\{\{TIME\}\}/g, now.toLocaleTimeString('en-US', {
         hour: '2-digit', minute: '2-digit'
     }));
+
+    // Replace Ouroboros context
+    if (options.previousFocus) {
+        content = content.replace('{{PREVIOUS_FOCUS}}', options.previousFocus);
+    } else {
+        // Default fallback
+        content = content.replace('{{PREVIOUS_FOCUS}}', '1. \n2. \n3. ');
+    }
 
     return content;
 }
