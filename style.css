@@ -1982,3 +1982,212 @@ body.focus-mode::before {
   transform: scale(0.98);
   opacity: 0.9;
 }
+
+/* ===========================================
+   ADDITIONAL PREMIUM REFINEMENTS
+   Elevated UI polish for professional feel
+   =========================================== */
+
+/* Enhanced input styling */
+input,
+textarea {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  color: var(--text-primary);
+  padding: var(--space-sm) var(--space-md);
+  font-family: inherit;
+  font-size: var(--font-size-base);
+  transition: all var(--transition-fast);
+}
+
+input:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.2);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-muted);
+}
+
+/* Enhanced button styling */
+.btn {
+  border-radius: 10px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  transition: all var(--transition-fast);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), transparent);
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.btn:hover::after {
+  opacity: 1;
+}
+
+/* Card-like sections */
+.section {
+  border-radius: 16px;
+  margin-bottom: var(--space-md);
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+}
+
+.section-header {
+  padding: var(--space-md);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+/* Tab bar polish */
+.tab-bar {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  background: rgba(18, 18, 26, 0.9);
+  border-top: 1px solid var(--border-color);
+}
+
+.tab-btn {
+  position: relative;
+  transition: all var(--transition-fast);
+}
+
+.tab-btn.active {
+  color: var(--accent-primary);
+}
+
+.tab-btn.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 24px;
+  height: 3px;
+  background: var(--accent-primary);
+  border-radius: 3px 3px 0 0;
+}
+
+/* Status bar polish */
+.status-bar {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  background: rgba(18, 18, 26, 0.95);
+}
+
+/* FAB (Quartermaster) premium glow */
+.quartermaster-btn {
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+  border: none;
+  transition: all var(--transition-normal);
+}
+
+.quartermaster-btn:hover {
+  transform: scale(1.05);
+  box-shadow:
+    0 0 40px rgba(0, 212, 255, 0.6),
+    0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+/* Context menu polish */
+.context-menu {
+  background: rgba(26, 26, 36, 0.98);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+/* Logo/title gradient */
+.app-title {
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 700;
+}
+
+/* Section count badge */
+.section-count {
+  background: linear-gradient(135deg, var(--bg-elevated), var(--bg-tertiary));
+  border-radius: 12px;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid var(--border-color);
+}
+
+/* Empty state polish */
+.empty-state .empty-icon {
+  display: block;
+  margin-bottom: var(--space-sm);
+  filter: drop-shadow(0 2px 8px rgba(0, 212, 255, 0.3));
+}
+
+/* Connection status glow */
+.status-online {
+  color: var(--accent-success);
+  text-shadow: 0 0 8px rgba(16, 185, 129, 0.5);
+}
+
+/* Item text gradient on hover */
+.item:hover .item-content {
+  background: linear-gradient(90deg, var(--text-primary), var(--accent-primary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Overscroll styling */
+body {
+  overscroll-behavior: none;
+}
+
+/* Selection in inputs */
+input::selection,
+textarea::selection {
+  background: var(--accent-primary);
+  color: var(--bg-primary);
+}
+
+/* Focus visible for accessibility */
+:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+
+/* Print styles (hide unnecessary elements) */
+@media print {
+
+  .status-bar,
+  .tab-bar,
+  .quartermaster-btn,
+  .menu-overlay {
+    display: none !important;
+  }
+
+  body {
+    background: white;
+    color: black;
+  }
+}
